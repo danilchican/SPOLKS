@@ -1,5 +1,10 @@
 package com.bsuir.danilchican.controller;
 
+import com.bsuir.danilchican.command.ICommand;
+import com.bsuir.danilchican.exception.CommandNotFoundException;
+import com.bsuir.danilchican.exception.WrongCommandFormatException;
+import com.bsuir.danilchican.util.InputManager;
+import com.bsuir.danilchican.util.Printer;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,7 +15,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public final class Controller {
 
     /**
-     * Logger to write logs.
+     * Logger to getCommand logs.
      */
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -49,6 +54,15 @@ public final class Controller {
     }
 
     public void work() {
-        // TODO implement work
+        InputManager keyboard = new InputManager();
+
+        do {
+            try {
+                ICommand command = keyboard.getCommand();
+                command.execute();
+            } catch (WrongCommandFormatException | CommandNotFoundException e) {
+                Printer.println(e.getMessage());
+            }
+        } while (!keyboard.wantExit());
     }
 }
