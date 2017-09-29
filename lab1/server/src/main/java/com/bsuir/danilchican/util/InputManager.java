@@ -27,7 +27,7 @@ public class InputManager {
      * @throws CommandNotFoundException
      */
     public ICommand getCommand() throws WrongCommandFormatException, CommandNotFoundException {
-        String cmd = scanner.next();
+        String cmd = scanner.nextLine();
         ICommand command = new Parser().parse(cmd);
 
         if(command instanceof ExitCommand) {

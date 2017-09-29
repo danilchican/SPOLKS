@@ -3,6 +3,7 @@ package com.bsuir.danilchican.parser;
 import com.bsuir.danilchican.command.CommandType;
 import com.bsuir.danilchican.command.ICommand;
 import com.bsuir.danilchican.exception.CommandNotFoundException;
+import com.bsuir.danilchican.exception.WrongCommandFormatException;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,7 +27,7 @@ public class TokenParser extends AbstractParser {
      * @return command instance
      */
     @Override
-    public ICommand handle(String cmd) {
+    public ICommand handle(String cmd) throws WrongCommandFormatException {
         Pattern pattern = Pattern.compile(CMD_FLAG_REGEX);
         Matcher matcher = pattern.matcher(cmd);
 
@@ -36,6 +37,8 @@ public class TokenParser extends AbstractParser {
 
             command.putFlag(flagName, flagValue);
         }
+
+        command.checkFlags();
 
         return command;
     }

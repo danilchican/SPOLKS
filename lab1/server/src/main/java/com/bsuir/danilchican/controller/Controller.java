@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -34,6 +35,11 @@ public final class Controller {
      */
     private static ReentrantLock lock = new ReentrantLock();
 
+    /**
+     * Get instance of controller.
+     *
+     * @return instance
+     */
     public static Controller getInstance() {
         if (!createdInstance.get()) {
             try {
@@ -53,6 +59,9 @@ public final class Controller {
         return instance;
     }
 
+    /**
+     * Start working controller.
+     */
     public void work() {
         InputManager keyboard = new InputManager();
 
@@ -61,7 +70,7 @@ public final class Controller {
                 ICommand command = keyboard.getCommand();
                 command.execute();
             } catch (WrongCommandFormatException | CommandNotFoundException e) {
-                Printer.println(e.getMessage());
+                LOGGER.log(Level.ERROR, e.getMessage());
             }
         } while (!keyboard.wantExit());
     }

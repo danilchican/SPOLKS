@@ -34,6 +34,6 @@ public class Parser extends AbstractParser {
             return new TokenParser(commandName).handle(cmd);
         }
 
-        throw new CommandNotFoundException("Cannot find command by name[=" + commandName + "]");
+        throw new CommandNotFoundException("Wrong command: " + commandName);
     }
 }

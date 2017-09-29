@@ -1,5 +1,7 @@
 package com.bsuir.danilchican.command;
 
+import com.bsuir.danilchican.exception.WrongCommandFormatException;
+
 import java.util.Map;
 
 public interface ICommand {
@@ -23,4 +25,9 @@ public interface ICommand {
      * @return hash map
      */
     Map<String, String> getFlags();
+
+    /**
+     * Check inputted flags.
+     */
+    void checkFlags() throws WrongCommandFormatException;
 }
