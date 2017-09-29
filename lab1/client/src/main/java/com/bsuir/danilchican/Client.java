@@ -2,8 +2,8 @@ package com.bsuir.danilchican;
 
 import com.bsuir.danilchican.controller.Controller;
 
-public class Server {
+public class Client {
     public static void main(String[] args) {
-        Controller.getInstance().work(); // build jar: mvn package
+        Controller.getInstance().work();
     }
 }

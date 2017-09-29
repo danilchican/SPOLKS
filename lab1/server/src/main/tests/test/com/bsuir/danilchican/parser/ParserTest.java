@@ -9,16 +9,12 @@ import com.bsuir.danilchican.parser.Parser;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ParserTest {
 
-    private static final String cmd = "help -flag=value -fas";
+    private static final String cmd = "help";
     private static IParser parser;
     private ICommand command;
 
@@ -32,15 +28,5 @@ public class ParserTest {
         command = parser.parse(cmd);
 
         assertThat(command, instanceOf(HelpCommand.class));
-    }
-
-    @Test
-    public void parseFlagsTest() {
-        Map<String, String> expected = new HashMap<String, String>() {{
-            put("flag", "value");
-            put("fas", null);
-        }};
-
-        assertThat(expected, is(expected));
     }
 }

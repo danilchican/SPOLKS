@@ -3,7 +3,7 @@ package com.bsuir.danilchican.command;
 import com.bsuir.danilchican.exception.CommandNotFoundException;
 
 public enum CommandType {
-    START("start", "Start listening connections", new StartCommand()),
+    CONNECT("connect", "Connect to server", new ConnectCommand()),
     HELP("help", "Display help information about available commands", new HelpCommand()),
     EXIT("exit", "Terminate program", new ExitCommand());
 
