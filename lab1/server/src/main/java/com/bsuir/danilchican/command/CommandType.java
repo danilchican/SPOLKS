@@ -1,20 +1,59 @@
 package com.bsuir.danilchican.command;
 
+import com.bsuir.danilchican.exception.CommandNotFoundException;
+
 public enum CommandType {
-    HELP("help", "Display help information about available commands");
+    HELP("help", "Display help information about available commands", new HelpCommand());
 
     private String commandName;
-
     private String description;
+
+    private ICommand command;
 
     /**
      * Constructor.
      *
      * @param commandName
+     * @param description
+     * @param command
      */
-    CommandType(String commandName, String description) {
+    CommandType(String commandName, String description, ICommand command) {
         this.commandName = commandName;
         this.description = description;
+        this.command = command;
+    }
+
+    /**
+     * Find command by command name.
+     *
+     * @param commandName
+     * @return command interface
+     * @throws CommandNotFoundException
+     */
+    public static ICommand findCommand(String commandName) throws CommandNotFoundException {
+        for(CommandType type : CommandType.values()) {
+            if(type.getName().equals(commandName)) {
+                return type.getCommand();
+            }
+        }
+
+        throw new CommandNotFoundException("Cannot find command by name[=" + commandName + "]");
+    }
+
+    /**
+     * Check if has current command.
+     *
+     * @param commandName
+     * @return boolean
+     */
+    public static boolean hasCommand(String commandName) {
+        for(CommandType type : CommandType.values()) {
+            if(type.getName().equals(commandName)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -33,5 +72,14 @@ public enum CommandType {
      */
     public String getDescription() {
         return description;
+    }
+
+    /**
+     * Get command by his type.
+     *
+     * @return command instance
+     */
+    public ICommand getCommand() {
+        return command;
     }
 }

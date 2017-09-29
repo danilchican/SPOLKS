@@ -1,6 +1,8 @@
 package com.bsuir.danilchican.parser;
 
 import com.bsuir.danilchican.command.ICommand;
+import com.bsuir.danilchican.exception.CommandNotFoundException;
+import com.bsuir.danilchican.exception.WrongCommandFormatException;
 
 public interface IParser {
 
@@ -11,5 +13,5 @@ public interface IParser {
      * @param command as string
      * @return command instance
      */
-    ICommand parse(String command);
+    ICommand parse(String command) throws WrongCommandFormatException, CommandNotFoundException;
 }

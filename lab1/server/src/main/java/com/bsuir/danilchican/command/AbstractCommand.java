@@ -1,24 +1,37 @@
 package com.bsuir.danilchican.command;
 
-public abstract class AbstractCommand implements ICommand {
+import java.util.HashMap;
+import java.util.Map;
 
-    private CommandType type;
+abstract class AbstractCommand implements ICommand {
+
+    private Map<String, String> flags;
 
     /**
-     * Set command type.
+     * Default constructor.
      */
-    @Override
-    public final void setType(CommandType type) {
-        this.type = type;
+    AbstractCommand() {
+        flags = new HashMap<>();
     }
 
     /**
-     * Return command type;
+     * Get all command flags.
      *
-     * @return type
+     * @return hash map
      */
     @Override
-    public final CommandType getType() {
-        return type;
+    public final Map<String, String> getFlags() {
+        return this.flags;
+    }
+
+    /**
+     * Put flag to command.
+     *
+     * @param name
+     * @param value
+     */
+    @Override
+    public final void putFlag(String name, String value) {
+        this.flags.put(name, value);
     }
 }

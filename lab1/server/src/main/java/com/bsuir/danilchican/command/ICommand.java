@@ -1,5 +1,7 @@
 package com.bsuir.danilchican.command;
 
+import java.util.Map;
+
 public interface ICommand {
 
     /**
@@ -8,14 +10,17 @@ public interface ICommand {
     void execute();
 
     /**
-     * Set command type.
+     * Put flag to command.
+     *
+     * @param name
+     * @param value
      */
-    void setType(CommandType type);
+    void putFlag(String name, String value);
 
     /**
-     * Get command type.
+     * Get all command flags.
      *
-     * @return type
+     * @return hash map
      */
-    CommandType getType();
+    Map<String, String> getFlags();
 }

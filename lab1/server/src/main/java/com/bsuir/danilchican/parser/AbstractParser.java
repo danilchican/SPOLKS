@@ -1,13 +1,10 @@
 package com.bsuir.danilchican.parser;
 
 import com.bsuir.danilchican.command.ICommand;
+import com.bsuir.danilchican.exception.CommandNotFoundException;
+import com.bsuir.danilchican.exception.WrongCommandFormatException;
 
 abstract class AbstractParser implements IParser {
-
-    /**
-     * Abstract parser for all protected parsers.
-     */
-    AbstractParser parser;
 
     /**
      * Handle parse text from cmd.
@@ -15,14 +12,14 @@ abstract class AbstractParser implements IParser {
      * @param cmd
      * @return command instance
      */
-    public abstract ICommand handle(String cmd);
+    public abstract ICommand handle(String cmd) throws WrongCommandFormatException, CommandNotFoundException;
 
     /**
      * Chain the data by handlers.
      *
      * @param cmd
      */
-    public ICommand parse(String cmd) {
+    public ICommand parse(String cmd) throws WrongCommandFormatException, CommandNotFoundException {
         return handle(cmd);
     }
 }
