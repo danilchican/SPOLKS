@@ -1,12 +1,10 @@
 package com.bsuir.danilchican;
 
-import com.bsuir.danilchican.command.HelpCommand;
-import com.bsuir.danilchican.command.ICommand;
+import com.bsuir.danilchican.controller.Controller;
 
 public class Server {
 
     public static void main(String[] args) {
-        ICommand command = new HelpCommand();
-        command.execute();
+        Controller.getInstance().work();
     }
 }
