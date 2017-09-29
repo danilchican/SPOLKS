@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 public class Parser extends AbstractParser {
 
-    private static final String CMD_COMMON_REGEX = "^([a-z]+)( -[a-z]+((?==)=[A-Za-z\\d]+)*)*$";
+    private static final String CMD_COMMON_REGEX = "^([a-z]+)( -[a-z]+((?==)=[A-Za-z\\d.]+)*)*$";
     private static final int COMMAND_GROUP_INDEX = 1;
 
     /**
@@ -25,7 +25,7 @@ public class Parser extends AbstractParser {
         Matcher matcher = pattern.matcher(cmd);
 
         if(!matcher.find()) {
-            throw new WrongCommandFormatException();
+            throw new WrongCommandFormatException("Wrong command format.");
         }
 
         final String commandName = matcher.group(COMMAND_GROUP_INDEX);
