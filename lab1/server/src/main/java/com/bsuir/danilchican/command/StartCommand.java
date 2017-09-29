@@ -3,7 +3,7 @@ package com.bsuir.danilchican.command;
 public class StartCommand extends AbstractCommand {
 
     StartCommand() {
-        availableFlags.add("");
+        availableTokens.add("");
     }
 
     /**

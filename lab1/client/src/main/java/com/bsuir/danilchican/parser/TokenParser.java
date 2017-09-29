@@ -10,9 +10,9 @@ import java.util.regex.Pattern;
 
 public class TokenParser extends AbstractParser {
 
-    private static final String CMD_FLAG_REGEX = "(-([a-z]+)((?==)=([A-Za-z\\d]+))*)";
-    private static final int FLAG_NAME_GROUP_INDEX = 2;
-    private static final int FLAG_VALUE_GROUP_INDEX = 4;
+    private static final String CMD_TOKEN_REGEX = "(-([a-z]+)((?==)=([A-Za-z\\d]+))*)";
+    private static final int TOKEN_NAME_GROUP_INDEX = 2;
+    private static final int TOKEN_VALUE_GROUP_INDEX = 4;
 
     private ICommand command;
 
@@ -28,18 +28,17 @@ public class TokenParser extends AbstractParser {
      */
     @Override
     public ICommand handle(String cmd) throws WrongCommandFormatException {
-        Pattern pattern = Pattern.compile(CMD_FLAG_REGEX);
+        Pattern pattern = Pattern.compile(CMD_TOKEN_REGEX);
         Matcher matcher = pattern.matcher(cmd);
 
         while(matcher.find()) {
-            final String flagName = matcher.group(FLAG_NAME_GROUP_INDEX);
-            final String flagValue = matcher.group(FLAG_VALUE_GROUP_INDEX);
+            final String tokenName = matcher.group(TOKEN_NAME_GROUP_INDEX);
+            final String tokenValue = matcher.group(TOKEN_VALUE_GROUP_INDEX);
 
-            command.putFlag(flagName, flagValue);
+            command.putToken(tokenName, tokenValue);
         }
 
-        command.checkFlags();
-
+        command.verifyTokens();
         return command;
     }
 }

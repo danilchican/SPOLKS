@@ -12,22 +12,22 @@ public interface ICommand {
     void execute();
 
     /**
-     * Put flag to command.
+     * Put token to command.
      *
      * @param name
      * @param value
      */
-    void putFlag(String name, String value);
+    void putToken(String name, String value);
 
     /**
-     * Get all command flags.
+     * Get all command tokens.
      *
      * @return hash map
      */
-    Map<String, String> getFlags();
+    Map<String, String> getTokens();
 
     /**
-     * Check inputted flags.
+     * Verify inputted tokens.
      */
-    void checkFlags() throws WrongCommandFormatException;
+    void verifyTokens() throws WrongCommandFormatException;
 }

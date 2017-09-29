@@ -9,52 +9,51 @@ import java.util.Map;
 
 abstract class AbstractCommand implements ICommand {
 
-    private Map<String, String> flags;
+    private Map<String, String> tokens;
 
-    List<String> availableFlags;
+    List<String> availableTokens;
 
     /**
      * Default constructor.
      */
     AbstractCommand() {
-        flags = new HashMap<>();
-        availableFlags = new ArrayList<>();
+        tokens = new HashMap<>();
+        availableTokens = new ArrayList<>();
     }
 
     /**
-     * Check inputted flags.
+     * Verify inputted tokens.
      */
     @Override
-    public final void checkFlags() throws WrongCommandFormatException {
-        if (!flags.isEmpty()) {
-            for (Map.Entry<String, String> fl : flags.entrySet()) {
+    public final void verifyTokens() throws WrongCommandFormatException {
+        if (!tokens.isEmpty()) {
+            for (Map.Entry<String, String> fl : tokens.entrySet()) {
                 final String key = fl.getKey();
 
-                if (!availableFlags.contains(key)) {
-                    throw new WrongCommandFormatException("The command does not contain '" + key + "' flag");
+                if (!availableTokens.contains(key)) {
+                    throw new WrongCommandFormatException("The command does not contain '" + key + "' token");
                 }
             }
         }
     }
 
     /**
-     * Get all command flags.
+     * Get all command tokens.
      *
      * @return hash map
      */
-    @Override
-    public final Map<String, String> getFlags() {
-        return this.flags;
+    public final Map<String, String> getTokens() {
+        return this.tokens;
     }
 
     /**
-     * Put flag to command.
+     * Put token to command.
      *
      * @param name
      * @param value
      */
     @Override
-    public final void putFlag(String name, String value) {
-        this.flags.put(name, value);
+    public final void putToken(String name, String value) {
+        this.tokens.put(name, value);
     }
 }
