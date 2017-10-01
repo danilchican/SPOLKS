@@ -34,7 +34,7 @@ public class Connection {
     /**
      * Default constructor.
      */
-    public Connection() {
+    Connection() {
         clientMessage = new byte[SIZE_BUFF];
     }
 
@@ -61,7 +61,7 @@ public class Connection {
             this.initStream();
             return true;
         } catch (IOException e) {
-            LOGGER.log(Level.ERROR, "Couldn't listen to port " + PORT);
+            LOGGER.log(Level.ERROR, "Couldn't connect to server.");
             return false;
         }
     }

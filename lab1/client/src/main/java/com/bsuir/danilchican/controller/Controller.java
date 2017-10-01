@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.jar.Pack200;
 
 public final class Controller {
 
@@ -82,6 +83,19 @@ public final class Controller {
      * @param c connection instance
      */
     public void setConnection(Connection c) {
-        this.connection = c;
+        if(this.connection == null) {
+            this.connection = c;
+        } else {
+            LOGGER.log(Level.WARN, "Can't create new connection. It already exist.");
+        }
+    }
+
+    /**
+     * Get opened connection;
+     *
+     * @return connection
+     */
+    public Connection getConnection() {
+        return connection;
     }
 }
