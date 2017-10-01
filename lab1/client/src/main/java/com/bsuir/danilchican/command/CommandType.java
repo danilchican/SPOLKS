@@ -4,6 +4,7 @@ import com.bsuir.danilchican.exception.CommandNotFoundException;
 
 public enum CommandType {
     CONNECT("connect", "Connect to server", new ConnectCommand()),
+    DISCONNECT("disconnect", "Disconnect from server", new DisconnectCommand()),
     HELP("help", "Display help information about available commands", new HelpCommand()),
     EXIT("exit", "Terminate program", new ExitCommand());
 
