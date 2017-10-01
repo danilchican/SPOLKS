@@ -13,7 +13,7 @@ public class ConnectCommandTest {
     @Test
     public void validateTokenSuccess() throws WrongCommandFormatException, CommandNotFoundException {
         final String tokenValue = "192.168.0.1";
-        final String cmd = "connect -" + ConnectCommand.AvailableToken.IP.getName() + "=" + tokenValue;
+        final String cmd = "connect -" + ConnectCommand.AvailableToken.IP.getName() + "='" + tokenValue + "'";
         final ICommand command = new Parser().handle(cmd);
 
         boolean actual = command.validateToken(tokenValue, ConnectCommand.AvailableToken.IP.getRegex());
@@ -41,7 +41,7 @@ public class ConnectCommandTest {
     @Test
     public void validateTokensSuccess() throws WrongCommandFormatException, CommandNotFoundException {
         final String tokenValue = "192.168.0.1";
-        final String cmd = "connect -" + ConnectCommand.AvailableToken.IP.getName() + "=" + tokenValue;
+        final String cmd = "connect -" + ConnectCommand.AvailableToken.IP.getName() + "='" + tokenValue + "'";
         final ICommand command = new Parser().handle(cmd);
 
         command.validateTokens();
