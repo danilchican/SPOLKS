@@ -87,11 +87,7 @@ public final class Controller {
      * @param c connection instance
      */
     public void setConnection(Connection c) {
-        if(this.connection == null) {
-            this.connection = c;
-        } else {
-            LOGGER.log(Level.WARN, "Can't create new connection. It already exist.");
-        }
+        this.connection = c;
     }
 
     /**
