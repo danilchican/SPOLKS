@@ -8,9 +8,7 @@ import com.bsuir.danilchican.util.Printer;
 import org.apache.logging.log4j.Level;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public class ConnectCommand extends AbstractCommand {
 
@@ -38,8 +36,6 @@ public class ConnectCommand extends AbstractCommand {
                     break;
                 case HELP:
                     executeHelp();
-                    break;
-                default:
                     break;
             }
         } catch (WrongCommandFormatException | AvailableTokenNotPresentException e) {

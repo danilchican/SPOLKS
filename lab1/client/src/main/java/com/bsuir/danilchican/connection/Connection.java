@@ -1,5 +1,6 @@
 package com.bsuir.danilchican.connection;
 
+import com.bsuir.danilchican.controller.Controller;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -95,14 +96,24 @@ public class Connection {
         }
     }
 
+    /**
+     * Close connection.
+     */
+    public void close() {
+        try {
+            is.close();
+            os.close();
+
+            socket.close();
+            Controller.getInstance().setConnection(null);
+        } catch (IOException e) {
+            LOGGER.log(Level.ERROR, "Error: " + e.getMessage());
+        }
+    }
+
     private void initStream() throws IOException {
         is = socket.getInputStream();
         os = socket.getOutputStream();
-    }
 
-    private void close() throws IOException {
-        is.close();
-        os.close();
-        socket.close();
     }
 }
