@@ -11,7 +11,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.jar.Pack200;
 
 public final class Controller {
 
@@ -36,6 +35,11 @@ public final class Controller {
     private static ReentrantLock lock = new ReentrantLock();
 
     private Connection connection;
+    private InputManager keyboard;
+
+    private Controller() {
+        keyboard = new InputManager();
+    }
 
     /**
      * Get instance of controller.
@@ -65,8 +69,6 @@ public final class Controller {
      * Start working controller.
      */
     public void work() {
-        InputManager keyboard = new InputManager();
-
         do {
             try {
                 ICommand command = keyboard.getCommand();
@@ -74,7 +76,9 @@ public final class Controller {
             } catch (WrongCommandFormatException | CommandNotFoundException e) {
                 LOGGER.log(Level.ERROR, e.getMessage());
             }
-        } while (!keyboard.wantExit());
+        } while (!keyboard.enteredExit());
+
+        LOGGER.log(Level.INFO, "Program is terminated.");
     }
 
     /**
@@ -97,5 +101,14 @@ public final class Controller {
      */
     public Connection getConnection() {
         return connection;
+    }
+
+    /**
+     * Get keyboard instance.
+     *
+     * @return keyboard
+     */
+    public InputManager getKeyboard() {
+        return keyboard;
     }
 }

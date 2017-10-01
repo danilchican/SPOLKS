@@ -1,5 +1,9 @@
 package com.bsuir.danilchican.command;
 
+import com.bsuir.danilchican.connection.Connection;
+import com.bsuir.danilchican.controller.Controller;
+import org.apache.logging.log4j.Level;
+
 public class ExitCommand extends AbstractCommand {
 
     /**
@@ -7,7 +11,13 @@ public class ExitCommand extends AbstractCommand {
      */
     @Override
     public void execute() {
-        // TODO implement
+        Connection connection = Controller.getInstance().getConnection();
+
+        if(connection != null) {
+            LOGGER.log(Level.WARN, "Connection is opened. Please, close connection to terminate program.");
+        } else {
+            Controller.getInstance().getKeyboard().wantExit(true);
+        }
     }
 
     /**
