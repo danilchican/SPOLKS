@@ -5,6 +5,7 @@ import com.bsuir.danilchican.exception.CommandNotFoundException;
 public enum CommandType {
     CONNECT("connect", "Connect to server", new ConnectCommand()),
     DISCONNECT("disconnect", "Disconnect from server", new DisconnectCommand()),
+    ECHO("echo", "Server echo", new EchoCommand()),
     HELP("help", "Display help information about available commands", new HelpCommand()),
     EXIT("exit", "Terminate program", new ExitCommand());
 
@@ -34,8 +35,8 @@ public enum CommandType {
      * @throws CommandNotFoundException
      */
     public static ICommand findCommand(String commandName) throws CommandNotFoundException {
-        for(CommandType type : CommandType.values()) {
-            if(type.getName().equals(commandName)) {
+        for (CommandType type : CommandType.values()) {
+            if (type.getName().equals(commandName)) {
                 return type.getCommand();
             }
         }
@@ -50,8 +51,8 @@ public enum CommandType {
      * @return boolean
      */
     public static boolean hasCommand(String commandName) {
-        for(CommandType type : CommandType.values()) {
-            if(type.getName().equals(commandName)) {
+        for (CommandType type : CommandType.values()) {
+            if (type.getName().equals(commandName)) {
                 return true;
             }
         }

@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 public class Parser extends AbstractParser {
 
-    private static final String CMD_COMMON_REGEX = "^([a-z]+)( -[a-z]+((?==)='[\\w.-]+')*)*$";
+    private static final String CMD_COMMON_REGEX = "^([a-z]+)( -[a-z]+((?==)='[\\w .-]+')*)*$";
     private static final int COMMAND_GROUP_INDEX = 1;
 
     /**
