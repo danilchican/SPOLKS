@@ -2,19 +2,22 @@ package com.bsuir.danilchican.command;
 
 import com.bsuir.danilchican.connection.Connection;
 import com.bsuir.danilchican.controller.Controller;
+import com.bsuir.danilchican.exception.AvailableTokenNotPresentException;
 import com.bsuir.danilchican.exception.WrongCommandFormatException;
+import com.bsuir.danilchican.util.Printer;
 import org.apache.logging.log4j.Level;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class ConnectCommand extends AbstractCommand {
 
     public static final String SERVER_IP_REGEX = "^(\\d{1,3}\\.){3}\\d{1,3}$";
 
     ConnectCommand() {
-        Arrays.stream(AvailableToken.values())
-                .forEach(t -> availableTokens.put(t.getName(), t.getRegex()));
+        Arrays.stream(AvailableToken.values()).forEach(t -> availableTokens.put(t.getName(), t.getRegex()));
     }
 
     /**
@@ -26,13 +29,20 @@ public class ConnectCommand extends AbstractCommand {
             validateRequired();
             validateTokens();
 
-            String address = getTokens().get(AvailableToken.IP.getName());
-            Connection connection = new Connection(address);
+            String firstKey = String.valueOf(getTokens().keySet().toArray()[0]);
+            AvailableToken currentToken = AvailableToken.find(firstKey);
 
-            if (connection.connect()) {
-                Controller.getInstance().setConnection(connection);
+            switch (currentToken) {
+                case IP:
+                    executeConnect();
+                    break;
+                case HELP:
+                    executeHelp();
+                    break;
+                default:
+                    break;
             }
-        } catch (WrongCommandFormatException e) {
+        } catch (WrongCommandFormatException | AvailableTokenNotPresentException e) {
             LOGGER.log(Level.ERROR, e.getMessage());
         }
     }
@@ -50,12 +60,16 @@ public class ConnectCommand extends AbstractCommand {
     private void validateRequired() throws WrongCommandFormatException {
         Map<String, String> tokens = getTokens();
 
-        if(tokens.size() > 1) {
+        if (tokens.size() > 1) {
             throw new WrongCommandFormatException("This command should have only one token.");
         }
 
+        if (tokens.containsKey(AvailableToken.HELP.getName())) {
+            return;
+        }
+
         for (AvailableToken t : AvailableToken.values()) {
-            if(t.isRequired()) {
+            if (t.isRequired()) {
                 String value = tokens.get(t.getName());
 
                 if (value == null || value.isEmpty()) {
@@ -63,6 +77,20 @@ public class ConnectCommand extends AbstractCommand {
                 }
             }
         }
+    }
+
+    private void executeConnect() {
+        String address = getTokens().get(AvailableToken.IP.getName());
+        Connection connection = new Connection(address);
+
+        if (connection.connect()) {
+            Controller.getInstance().setConnection(connection);
+        }
+    }
+
+    private void executeHelp() {
+        Printer.println("Command format:");
+        Printer.println("   connect -ip='192.168.0.1' [-help]");
     }
 
     public enum AvailableToken {
@@ -77,6 +105,16 @@ public class ConnectCommand extends AbstractCommand {
             this.name = name;
             this.regex = regex;
             this.required = required;
+        }
+
+        public static AvailableToken find(String name) throws AvailableTokenNotPresentException {
+            for (AvailableToken t : values()) {
+                if (t.getName().equals(name)) {
+                    return t;
+                }
+            }
+
+            throw new AvailableTokenNotPresentException("Token '" + name + "' is not available.");
         }
 
         public String getName() {
