@@ -82,6 +82,6 @@ public enum CommandType {
      * @return command instance
      */
     public ICommand getCommand() {
-        return command;
+        return command.build();
     }
 }

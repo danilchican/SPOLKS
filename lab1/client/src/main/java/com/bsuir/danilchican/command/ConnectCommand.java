@@ -1,13 +1,15 @@
 package com.bsuir.danilchican.command;
 
-import com.bsuir.danilchican.util.Printer;
+import com.bsuir.danilchican.exception.WrongCommandFormatException;
+import org.apache.logging.log4j.Level;
 
 public class ConnectCommand extends AbstractCommand {
 
-    private static final String AVAILABLE_SERVER_IP = "ip";
+    public static final String AVAILABLE_SERVER_IP = "ip";
+    public static final String SERVER_IP_REGEX = "^(\\d{1,3}\\.){3}\\d{1,3}$";
 
     ConnectCommand() {
-        availableTokens.add(AVAILABLE_SERVER_IP);
+        availableTokens.put(AVAILABLE_SERVER_IP, SERVER_IP_REGEX);
     }
 
     /**
@@ -15,7 +17,21 @@ public class ConnectCommand extends AbstractCommand {
      */
     @Override
     public void execute() {
-        Printer.println(getTokens().toString());
-        // TODO implement
+        try {
+            validateTokens();
+            // TODO implement
+        } catch (WrongCommandFormatException e) {
+            LOGGER.log(Level.ERROR, e.getMessage());
+        }
+    }
+
+    /**
+     * Build command instance.
+     *
+     * @return instance
+     */
+    @Override
+    public ICommand build() {
+        return new ConnectCommand();
     }
 }

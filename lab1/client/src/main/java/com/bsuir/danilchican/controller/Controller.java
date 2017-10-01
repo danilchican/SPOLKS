@@ -1,6 +1,7 @@
 package com.bsuir.danilchican.controller;
 
 import com.bsuir.danilchican.command.ICommand;
+import com.bsuir.danilchican.connection.Connection;
 import com.bsuir.danilchican.exception.CommandNotFoundException;
 import com.bsuir.danilchican.exception.WrongCommandFormatException;
 import com.bsuir.danilchican.util.InputManager;
@@ -32,6 +33,8 @@ public final class Controller {
      * Reentrant lock.
      */
     private static ReentrantLock lock = new ReentrantLock();
+
+    private Connection connection;
 
     /**
      * Get instance of controller.
@@ -71,5 +74,14 @@ public final class Controller {
                 LOGGER.log(Level.ERROR, e.getMessage());
             }
         } while (!keyboard.wantExit());
+    }
+
+    /**
+     * Set connection.
+     *
+     * @param c connection instance
+     */
+    public void setConnection(Connection c) {
+        this.connection = c;
     }
 }
