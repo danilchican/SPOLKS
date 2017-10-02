@@ -62,8 +62,6 @@ class ClientHandler implements Runnable {
         } catch (Exception e) {
             LOGGER.log(Level.ERROR, "Error: " + e.getMessage());
         }
-
-        LOGGER.log(Level.INFO, "Client #" + clientId + " disconnected!");
     }
 
     private void initStream() throws IOException {

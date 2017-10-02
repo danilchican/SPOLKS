@@ -30,4 +30,27 @@ public interface ICommand {
      * Verify inputted tokens.
      */
     void verifyTokens() throws WrongCommandFormatException;
+
+    /**
+     * Build command instance.
+     *
+     * @return instance
+     */
+    ICommand build();
+
+    /**
+     * Validate tokens by regex.
+     *
+     * @throws WrongCommandFormatException
+     */
+    void validateTokens() throws WrongCommandFormatException;
+
+    /**
+     * Validate single token by regex.
+     *
+     * @param tokenValue
+     * @param regex
+     * @return boolean
+     */
+    boolean validateToken(String tokenValue, String regex);
 }

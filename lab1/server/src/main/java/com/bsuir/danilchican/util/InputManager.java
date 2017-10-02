@@ -1,6 +1,5 @@
 package com.bsuir.danilchican.util;
 
-import com.bsuir.danilchican.command.ExitCommand;
 import com.bsuir.danilchican.command.ICommand;
 import com.bsuir.danilchican.exception.CommandNotFoundException;
 import com.bsuir.danilchican.exception.WrongCommandFormatException;
@@ -28,21 +27,19 @@ public class InputManager {
      */
     public ICommand getCommand() throws WrongCommandFormatException, CommandNotFoundException {
         String cmd = scanner.nextLine();
-        ICommand command = new Parser().parse(cmd);
+        return new Parser().parse(cmd);
+    }
 
-        if(command instanceof ExitCommand) {
-            isWantExit = true;
-        }
-
-        return command;
+    public void wantExit(boolean want) {
+        isWantExit = want;
     }
 
     /**
-     * Check if a user want to exit.
+     * Check if a user select exit option.
      *
      * @return boolean
      */
-    public boolean wantExit() {
+    public boolean enteredExit() {
         return isWantExit;
     }
 }

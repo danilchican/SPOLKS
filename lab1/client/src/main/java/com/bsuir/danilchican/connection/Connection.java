@@ -35,7 +35,7 @@ public class Connection {
     /**
      * Default constructor.
      */
-    Connection() {
+    private Connection() {
         clientMessage = new byte[SIZE_BUFF];
     }
 
@@ -57,6 +57,7 @@ public class Connection {
     public boolean connect() {
         try {
             socket = new Socket(serverIP, PORT);
+            socket.setKeepAlive(true);
             LOGGER.log(Level.INFO, "Connected to server.");
 
             this.initStream();
@@ -114,6 +115,5 @@ public class Connection {
     private void initStream() throws IOException {
         is = socket.getInputStream();
         os = socket.getOutputStream();
-
     }
 }

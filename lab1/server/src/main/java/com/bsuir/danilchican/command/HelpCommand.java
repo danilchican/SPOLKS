@@ -22,4 +22,14 @@ public class HelpCommand extends AbstractCommand {
             Printer.println("  " + k + " - " + v);
         });
     }
+
+    /**
+     * Build command instance.
+     *
+     * @return instance
+     */
+    @Override
+    public ICommand build() {
+        return new HelpCommand();
+    }
 }

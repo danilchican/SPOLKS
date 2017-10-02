@@ -1,6 +1,7 @@
 package com.bsuir.danilchican.controller;
 
 import com.bsuir.danilchican.command.ICommand;
+import com.bsuir.danilchican.connection.Connection;
 import com.bsuir.danilchican.exception.CommandNotFoundException;
 import com.bsuir.danilchican.exception.WrongCommandFormatException;
 import com.bsuir.danilchican.util.InputManager;
@@ -33,6 +34,13 @@ public final class Controller {
      */
     private static ReentrantLock lock = new ReentrantLock();
 
+    private Connection connection;
+    private InputManager keyboard;
+
+    private Controller() {
+        keyboard = new InputManager();
+    }
+
     /**
      * Get instance of controller.
      *
@@ -61,8 +69,6 @@ public final class Controller {
      * Start working controller.
      */
     public void work() {
-        InputManager keyboard = new InputManager();
-
         do {
             try {
                 ICommand command = keyboard.getCommand();
@@ -70,6 +76,35 @@ public final class Controller {
             } catch (WrongCommandFormatException | CommandNotFoundException e) {
                 LOGGER.log(Level.ERROR, e.getMessage());
             }
-        } while (!keyboard.wantExit());
+        } while (!keyboard.enteredExit());
+
+        LOGGER.log(Level.INFO, "Program is terminated.");
+    }
+
+    /**
+     * Set connection.
+     *
+     * @param c connection instance
+     */
+    public void setConnection(Connection c) {
+        this.connection = c;
+    }
+
+    /**
+     * Get opened connection.
+     *
+     * @return connection
+     */
+    public Connection getConnection() {
+        return connection;
+    }
+
+    /**
+     * Get keyboard instance.
+     *
+     * @return keyboard
+     */
+    public InputManager getKeyboard() {
+        return keyboard;
     }
 }
