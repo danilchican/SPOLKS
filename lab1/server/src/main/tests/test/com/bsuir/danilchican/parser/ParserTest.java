@@ -1,6 +1,6 @@
 package test.com.bsuir.danilchican.parser;
 
-import com.bsuir.danilchican.command.HelpCommand;
+import com.bsuir.danilchican.command.EchoCommand;
 import com.bsuir.danilchican.command.ICommand;
 import com.bsuir.danilchican.exception.CommandNotFoundException;
 import com.bsuir.danilchican.exception.WrongCommandFormatException;
@@ -14,7 +14,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ParserTest {
 
-    private static final String cmd = "help";
+    private static final String cmd = "echo";
     private static IParser parser;
     private ICommand command;
 
@@ -27,6 +27,6 @@ public class ParserTest {
     public void parseTest() throws WrongCommandFormatException, CommandNotFoundException {
         command = parser.parse(cmd);
 
-        assertThat(command, instanceOf(HelpCommand.class));
+        assertThat(command, instanceOf(EchoCommand.class));
     }
 }

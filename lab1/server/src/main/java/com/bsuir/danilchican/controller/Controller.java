@@ -69,16 +69,11 @@ public final class Controller {
      * Start working controller.
      */
     public void work() {
-        do {
-            try {
-                ICommand command = keyboard.getCommand();
-                command.execute();
-            } catch (WrongCommandFormatException | CommandNotFoundException e) {
-                LOGGER.log(Level.ERROR, e.getMessage());
-            }
-        } while (!keyboard.enteredExit());
+        connection = new Connection();
 
-        LOGGER.log(Level.INFO, "Program is terminated.");
+        if (connection.open()) {
+            connection.listen();
+        }
     }
 
     /**

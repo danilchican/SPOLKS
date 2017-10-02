@@ -1,6 +1,6 @@
 package com.bsuir.danilchican.command;
 
-public class ExitCommand extends AbstractCommand {
+public class EchoCommand extends AbstractCommand {
 
     /**
      * Execute command.
@@ -17,6 +17,6 @@ public class ExitCommand extends AbstractCommand {
      */
     @Override
     public ICommand build() {
-        return new ExitCommand();
+        return new EchoCommand();
     }
 }
