@@ -1,5 +1,6 @@
 package com.bsuir.danilchican.command;
 
+import com.bsuir.danilchican.connection.Connection;
 import com.bsuir.danilchican.controller.Controller;
 import com.bsuir.danilchican.exception.AvailableTokenNotPresentException;
 import com.bsuir.danilchican.exception.WrongCommandFormatException;
@@ -24,7 +25,9 @@ public class EchoCommand extends AbstractCommand {
             validateRequired();
             validateTokens();
 
-            String firstKey = String.valueOf(getTokens().keySet().toArray()[0]);
+            Map<String, String> toks = getTokens();
+
+            String firstKey = String.valueOf(toks.keySet().toArray()[0]);
             AvailableToken currentToken = AvailableToken.find(firstKey);
 
             switch (currentToken) {
@@ -73,8 +76,12 @@ public class EchoCommand extends AbstractCommand {
     }
 
     private void executeEcho() {
-        if (Controller.getInstance().getConnection() != null) {
-            // TODO implement
+        Connection connection = Controller.getInstance().getConnection();
+        if (connection != null) {
+            if (connection.sendMessage(cmd)) {
+                String receivedData = connection.receive();
+                Printer.println("Server: " + receivedData);
+            }
         } else {
             LOGGER.log(Level.WARN, "You're not connected to server.");
         }

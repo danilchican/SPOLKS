@@ -13,6 +13,8 @@ abstract class AbstractCommand implements ICommand {
     Map<String, String> availableTokens;
     private Map<String, String> tokens;
 
+    String cmd;
+
     /**
      * Logger to getCommand logs.
      */
@@ -94,5 +96,14 @@ abstract class AbstractCommand implements ICommand {
     public final boolean validateToken(String tokenValue, String regex) {
         return (tokenValue == null && regex == null)
                 || (tokenValue != null && !tokenValue.isEmpty() && !regex.isEmpty() && tokenValue.matches(regex));
+    }
+
+    /**
+     * Set cmd.
+     *
+     * @param cmd
+     */
+    public final void setCmd(String cmd) {
+        this.cmd = cmd;
     }
 }

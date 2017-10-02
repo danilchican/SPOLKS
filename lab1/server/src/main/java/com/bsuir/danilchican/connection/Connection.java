@@ -1,5 +1,9 @@
 package com.bsuir.danilchican.connection;
 
+import com.bsuir.danilchican.command.ICommand;
+import com.bsuir.danilchican.exception.CommandNotFoundException;
+import com.bsuir.danilchican.exception.WrongCommandFormatException;
+import com.bsuir.danilchican.parser.Parser;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,7 +23,7 @@ public class Connection {
 
     private ServerSocket socket;
 
-    private static final int SIZE_BUFF = 100;
+    private static final int SIZE_BUFF = 256;
     private static final int PORT = 1024;
     private static final int BACKLOG = 10;
 
@@ -94,10 +98,14 @@ public class Connection {
 
                         String cmd = new String(clientMessage, 0, countBytes);
                         LOGGER.log(Level.DEBUG, "Client: " + cmd);
-                        // TODO command execute
+
+                        ICommand command = new Parser().handle(cmd);
+                        command.execute();
                     } catch (IOException e) {
-                        LOGGER.log(Level.INFO, "Client stopped working with server.");
+                        LOGGER.log(Level.ERROR, "Client stopped working with server.");
                         break;
+                    } catch (WrongCommandFormatException | CommandNotFoundException e) {
+                        LOGGER.log(Level.ERROR, "Error: " + e.getMessage());
                     }
                 }
 

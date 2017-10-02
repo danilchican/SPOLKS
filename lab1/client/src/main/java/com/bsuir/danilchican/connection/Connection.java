@@ -86,14 +86,17 @@ public class Connection {
     /**
      * Receive message from server.
      */
-    public void receive() {
+    public String receive() {
         try {
             int countBytes = is.read(clientMessage);
 
             String data = new String(clientMessage, 0, countBytes);
-            LOGGER.log(Level.DEBUG, "Received data from server: " + data);
+            LOGGER.log(Level.DEBUG, "Server: " + data);
+
+            return data;
         } catch (IOException e) {
             LOGGER.log(Level.ERROR, "Error: " + e.getMessage());
+            return null;
         }
     }
 

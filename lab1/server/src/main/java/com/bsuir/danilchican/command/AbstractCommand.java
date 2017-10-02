@@ -63,36 +63,4 @@ abstract class AbstractCommand implements ICommand {
     public final void putToken(String name, String value) {
         this.tokens.put(name, value);
     }
-
-    /**
-     * Validate tokens by regex.
-     *
-     * @throws WrongCommandFormatException
-     */
-    @Override
-    public final void validateTokens() throws WrongCommandFormatException {
-        for (Map.Entry<String, String> token : getTokens().entrySet()) {
-            String tokenKey = token.getKey();
-            String tokenValue = token.getValue();
-
-            String regex = availableTokens.get(tokenKey);
-
-            if (!validateToken(tokenValue, regex)) {
-                throw new WrongCommandFormatException("Token '" + tokenKey + "' is incorrect.");
-            }
-        }
-    }
-
-    /**
-     * Validate single token by regex.
-     *
-     * @param tokenValue
-     * @param regex
-     * @return boolean
-     */
-    @Override
-    public final boolean validateToken(String tokenValue, String regex) {
-        return (tokenValue == null && regex == null)
-                || (tokenValue != null && !tokenValue.isEmpty() && !regex.isEmpty() && tokenValue.matches(regex));
-    }
 }

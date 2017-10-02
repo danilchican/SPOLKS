@@ -29,6 +29,8 @@ public class TokenParser extends AbstractParser {
      */
     @Override
     public ICommand handle(String cmd) throws WrongCommandFormatException {
+        command.setCmd(cmd);
+
         Pattern pattern = Pattern.compile(CMD_TOKEN_REGEX);
         Matcher matcher = pattern.matcher(cmd);
 

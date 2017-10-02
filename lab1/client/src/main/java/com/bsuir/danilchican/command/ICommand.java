@@ -53,4 +53,11 @@ public interface ICommand {
      * @return boolean
      */
     boolean validateToken(String tokenValue, String regex);
+
+    /**
+     * Set cmd.
+     *
+     * @param cmd
+     */
+    void setCmd(String cmd);
 }

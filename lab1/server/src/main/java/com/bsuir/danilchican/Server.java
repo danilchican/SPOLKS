@@ -1,6 +1,5 @@
 package com.bsuir.danilchican;
 
-import com.bsuir.danilchican.connection.Connection;
 import com.bsuir.danilchican.controller.Controller;
 
 public class Server {
