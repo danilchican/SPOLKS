@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 public class TokenParser extends AbstractParser {
 
-    private static final String CMD_TOKEN_REGEX = "(-([a-z]+)((?==)='([\\w .-]+)')*)";
+    private static final String CMD_TOKEN_REGEX = "(-([a-z]+)((?==)='([\\w .-:\\\\]+)')*)";
 
     private static final int TOKEN_NAME_GROUP_INDEX = 2;
     private static final int TOKEN_VALUE_GROUP_INDEX = 4;

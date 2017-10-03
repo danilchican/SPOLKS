@@ -77,6 +77,7 @@ public class EchoCommand extends AbstractCommand {
 
     private void executeEcho() {
         Connection connection = Controller.getInstance().getConnection();
+
         if (connection != null) {
             if (connection.sendMessage(cmd)) {
                 String receivedData = connection.receive();
