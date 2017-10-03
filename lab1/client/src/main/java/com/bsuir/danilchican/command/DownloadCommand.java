@@ -12,12 +12,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
-public class DownloadCommand extends AbstractCommand {
+class DownloadCommand extends AbstractCommand {
 
     private static final String SUCCESS = "success";
     private static final String START_TRANSFER = "start";
 
-    private static final int BUFF_SIZE = 5095;
+    private static final int BUFF_SIZE = 5096;
 
     DownloadCommand() {
         Arrays.stream(AvailableToken.values()).forEach(t -> availableTokens.put(t.getName(), t.getRegex()));
@@ -104,13 +104,18 @@ public class DownloadCommand extends AbstractCommand {
                         try {
                             FileOutputStream fos = new FileOutputStream(getTokens().get(AvailableToken.NAME.getName()));
 
-                            while (receivedBytes < fileSize) {
-                                byte[] buff = connection.receiveBuff(BUFF_SIZE);
-                                int count = connection.getReceivedBytesCount();
-                                receivedBytes += count;
+                            byte[] buff = new byte[BUFF_SIZE];
+                            int count;
 
-                                fos.write(buff);
+                            while ((count = connection.receive(buff)) != -1) {
+                                receivedBytes += count;
+                                fos.write(Arrays.copyOfRange(buff, 0, count));
+
                                 LOGGER.log(Level.DEBUG, "Received " + receivedBytes + " bytes.");
+
+                                if(receivedBytes == fileSize) {
+                                    break;
+                                }
                             }
 
                             fos.close();
@@ -126,7 +131,7 @@ public class DownloadCommand extends AbstractCommand {
         }
     }
 
-    public enum AvailableToken {
+    private enum AvailableToken {
         PATH("path", "^[\\w .-:\\\\]+$", true),
         NAME("name", "^[\\w .-:\\\\]+$", true),
         HELP("help", null, false);

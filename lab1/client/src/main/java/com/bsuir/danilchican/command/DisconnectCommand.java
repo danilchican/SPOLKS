@@ -5,7 +5,7 @@ import com.bsuir.danilchican.controller.Controller;
 import com.bsuir.danilchican.exception.WrongCommandFormatException;
 import org.apache.logging.log4j.Level;
 
-public class DisconnectCommand extends AbstractCommand {
+class DisconnectCommand extends AbstractCommand {
 
     /**
      * Execute command.

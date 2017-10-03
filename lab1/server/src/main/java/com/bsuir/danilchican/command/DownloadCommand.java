@@ -2,16 +2,17 @@ package com.bsuir.danilchican.command;
 
 import com.bsuir.danilchican.connection.Connection;
 import com.bsuir.danilchican.controller.Controller;
-import com.bsuir.danilchican.exception.AvailableTokenNotPresentException;
 import org.apache.logging.log4j.Level;
 
 import java.io.*;
 import java.util.Arrays;
 
-public class DownloadCommand extends AbstractCommand {
+class DownloadCommand extends AbstractCommand {
 
     private static final String SUCCESS = "success";
     private static final String START_TRANSFER = "start";
+
+    private static final int BUFF_SIZE = 5096;
 
     DownloadCommand() {
         Arrays.stream(AvailableToken.values()).forEach(t -> availableTokens.put(t.getName(), t.getRegex()));
@@ -48,6 +49,7 @@ public class DownloadCommand extends AbstractCommand {
 
         if (connection != null) {
             File file = new File(path);
+
             final long fileSize = file.length();
 
             if (file.exists() && !file.isDirectory()) {
@@ -55,11 +57,14 @@ public class DownloadCommand extends AbstractCommand {
 
                 if (START_TRANSFER.equals(connection.read())) {
                     FileInputStream fin = new FileInputStream(file);
-                    byte fileContent[] = new byte[(int) fileSize];
 
-                    // TODO change to send part by part of bytes
-                    fin.read(fileContent);
-                    connection.write(fileContent);
+                    int receivedBytes;
+                    byte fileContent[] = new byte[BUFF_SIZE];
+
+                    while ((receivedBytes = fin.read(fileContent, 0, BUFF_SIZE)) != -1) {
+                        connection.write(fileContent, receivedBytes);
+                        LOGGER.log(Level.DEBUG, "Sent " + receivedBytes + " bytes.");
+                    }
 
                     LOGGER.log(Level.INFO, "File is transferred.");
                 } else {
@@ -75,28 +80,16 @@ public class DownloadCommand extends AbstractCommand {
         }
     }
 
-    public enum AvailableToken {
-        PATH("path", "^[\\w .-:\\\\]+$", true),
-        NAME("name", "^[\\w .-:\\\\]+$", true);
+    private enum AvailableToken {
+        PATH("path", "^[\\w .-:\\\\]+$"),
+        NAME("name", "^[\\w .-:\\\\]+$");
 
         private String name;
         private String regex;
-        private boolean required;
 
-        AvailableToken(String name, String regex, boolean required) {
+        AvailableToken(String name, String regex) {
             this.name = name;
             this.regex = regex;
-            this.required = required;
-        }
-
-        public static AvailableToken find(String name) throws AvailableTokenNotPresentException {
-            for (AvailableToken t : values()) {
-                if (t.getName().equals(name)) {
-                    return t;
-                }
-            }
-
-            throw new AvailableTokenNotPresentException("Token '" + name + "' is not available.");
         }
 
         public String getName() {
@@ -105,10 +98,6 @@ public class DownloadCommand extends AbstractCommand {
 
         public String getRegex() {
             return regex;
-        }
-
-        public boolean isRequired() {
-            return required;
         }
     }
 }

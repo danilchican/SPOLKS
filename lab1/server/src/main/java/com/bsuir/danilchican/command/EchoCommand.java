@@ -44,7 +44,7 @@ public class EchoCommand extends AbstractCommand {
         connection.write(content);
     }
 
-    public enum AvailableToken {
+    private enum AvailableToken {
         CONTENT("content", null);
 
         private String name;

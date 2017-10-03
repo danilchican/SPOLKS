@@ -4,7 +4,7 @@ import com.bsuir.danilchican.util.Printer;
 
 import java.util.HashMap;
 
-public class HelpCommand extends AbstractCommand {
+class HelpCommand extends AbstractCommand {
 
     /**
      * Execute command.

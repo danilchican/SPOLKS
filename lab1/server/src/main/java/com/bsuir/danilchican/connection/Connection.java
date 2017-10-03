@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 
 public class Connection {
 
@@ -52,8 +53,8 @@ public class Connection {
      * @param bytes
      * @throws IOException
      */
-    public void write(byte[] bytes) throws IOException {
-        os.write(bytes);
+    public void write(byte[] bytes, int length) throws IOException {
+        os.write(Arrays.copyOfRange(bytes, 0, length));
     }
 
     /**
@@ -100,9 +101,9 @@ public class Connection {
 
                 while (true) {
                     try {
-                        int countBytes = is.read(clientMessage);
+                        int countBytes;
 
-                        if (countBytes == -1) {
+                        if ((countBytes = is.read(clientMessage)) == -1) {
                             break;
                         }
 

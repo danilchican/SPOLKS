@@ -10,7 +10,7 @@ import org.apache.logging.log4j.Level;
 import java.util.Arrays;
 import java.util.Map;
 
-public class EchoCommand extends AbstractCommand {
+class EchoCommand extends AbstractCommand {
 
     EchoCommand() {
         Arrays.stream(AvailableToken.values()).forEach(t -> availableTokens.put(t.getName(), t.getRegex()));
@@ -92,7 +92,7 @@ public class EchoCommand extends AbstractCommand {
         Printer.println("   echo -content='Your some text' [-help]");
     }
 
-    public enum AvailableToken {
+    private enum AvailableToken {
         CONTENT("content", "^[\\w .-]+$", true),
         HELP("help", null, false);
 

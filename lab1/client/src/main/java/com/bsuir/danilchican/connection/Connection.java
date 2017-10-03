@@ -18,7 +18,7 @@ public class Connection {
      */
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private static final int SIZE_BUFF = 100;
+    private static final int SIZE_BUFF = 256;
     private static final int PORT = 1024;
 
     /**
@@ -32,7 +32,6 @@ public class Connection {
     private OutputStream os;
 
     private byte clientMessage[];
-    private int receivedBytesCount = 0;
 
     /**
      * Default constructor.
@@ -106,30 +105,13 @@ public class Connection {
         }
     }
 
-    public byte[] receiveBuff(final int buffSize) {
+    public int receive(byte[] buffer) {
         try {
-            byte[] buffer = new byte[buffSize];
-            int count = is.read(buffer);
-
-            if(count != -1) {
-                setReceivedBytesCount(count);
-            } else {
-                LOGGER.log(Level.ERROR, "Count = -1. Something went wrong");
-            }
-
-            return buffer;
+            return is.read(buffer);
         } catch (IOException e) {
             LOGGER.log(Level.ERROR, "Error: " + e.getMessage());
-            return null;
+            return 0;
         }
-    }
-
-    public void setReceivedBytesCount(int receivedBytesCount) {
-        this.receivedBytesCount = receivedBytesCount;
-    }
-
-    public int getReceivedBytesCount() {
-        return receivedBytesCount;
     }
 
     /**

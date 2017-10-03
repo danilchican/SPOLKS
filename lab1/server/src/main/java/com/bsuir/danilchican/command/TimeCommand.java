@@ -9,7 +9,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class TimeCommand extends AbstractCommand {
+class TimeCommand extends AbstractCommand {
 
     private static final String DEFAULT_DATE_FORMAT = "yyyy/MM/dd HH:mm:ss";
 

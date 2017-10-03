@@ -5,7 +5,7 @@ import com.bsuir.danilchican.controller.Controller;
 import com.bsuir.danilchican.exception.WrongCommandFormatException;
 import org.apache.logging.log4j.Level;
 
-public class TimeCommand extends AbstractCommand {
+class TimeCommand extends AbstractCommand {
 
     /**
      * Execute command.

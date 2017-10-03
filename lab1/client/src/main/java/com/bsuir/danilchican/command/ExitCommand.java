@@ -83,7 +83,7 @@ public class ExitCommand extends AbstractCommand {
         Printer.println("   exit [-force] [-help]");
     }
 
-    public enum AvailableToken {
+    private enum AvailableToken {
         FORCE("force", null, false),
         HELP("help", null, false);
 
