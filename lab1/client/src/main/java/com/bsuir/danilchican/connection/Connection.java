@@ -31,6 +31,7 @@ public class Connection {
     private OutputStream os;
 
     private byte clientMessage[];
+    private int receivedBytesCount = 0;
 
     /**
      * Default constructor.
@@ -98,6 +99,32 @@ public class Connection {
             LOGGER.log(Level.ERROR, "Error: " + e.getMessage());
             return null;
         }
+    }
+
+    public byte[] receiveBuff(final int buffSize) {
+        try {
+            byte[] buffer = new byte[buffSize];
+            int count = is.read(buffer);
+
+            if(count != -1) {
+                setReceivedBytesCount(count);
+            } else {
+                LOGGER.log(Level.ERROR, "Count = -1. Something went wrong");
+            }
+
+            return buffer;
+        } catch (IOException e) {
+            LOGGER.log(Level.ERROR, "Error: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public void setReceivedBytesCount(int receivedBytesCount) {
+        this.receivedBytesCount = receivedBytesCount;
+    }
+
+    public int getReceivedBytesCount() {
+        return receivedBytesCount;
     }
 
     /**

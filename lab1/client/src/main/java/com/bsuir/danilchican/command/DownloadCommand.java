@@ -7,6 +7,8 @@ import com.bsuir.danilchican.exception.WrongCommandFormatException;
 import com.bsuir.danilchican.util.Printer;
 import org.apache.logging.log4j.Level;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -14,6 +16,8 @@ public class DownloadCommand extends AbstractCommand {
 
     private static final String SUCCESS = "success";
     private static final String START_TRANSFER = "start";
+
+    private static final int BUFF_SIZE = 256;
 
     DownloadCommand() {
         Arrays.stream(AvailableToken.values()).forEach(t -> availableTokens.put(t.getName(), t.getRegex()));
@@ -34,11 +38,11 @@ public class DownloadCommand extends AbstractCommand {
             AvailableToken currentToken = AvailableToken.find(firstKey);
 
             switch (currentToken) {
-                case PATH:
-                    executeDownload();
-                    break;
                 case HELP:
                     executeHelp();
+                    break;
+                default:
+                    executeDownload();
                     break;
             }
         } catch (WrongCommandFormatException | AvailableTokenNotPresentException e) {
@@ -59,8 +63,8 @@ public class DownloadCommand extends AbstractCommand {
     private void validateRequired() throws WrongCommandFormatException {
         Map<String, String> tokens = getTokens();
 
-        if (tokens.size() > 1) {
-            throw new WrongCommandFormatException("This command should have only one token.");
+        if (tokens.size() > 2) {
+            throw new WrongCommandFormatException("This command should have only one or two tokens.");
         }
 
         if (tokens.containsKey(AvailableToken.HELP.getName())) {
@@ -80,7 +84,7 @@ public class DownloadCommand extends AbstractCommand {
 
     private void executeHelp() {
         Printer.println("Command format:");
-        Printer.println("   download -path='path to file' [-help]");
+        Printer.println("   download -path='path to file' -name='file name' [-help]");
     }
 
     private void executeDownload() {
@@ -88,11 +92,32 @@ public class DownloadCommand extends AbstractCommand {
 
         if (connection != null) {
             if (connection.sendMessage(cmd)) {
-                String confirmation = connection.receive();
+                String[] confirmation = connection.receive().split(" ");
 
-                if (SUCCESS.equals(confirmation)) {
-                    if(connection.sendMessage(START_TRANSFER)) {
-                        // TODO download file from server
+                if (SUCCESS.equals(confirmation[0])) {
+                    final long fileSize = Long.parseLong(confirmation[1]);
+                    LOGGER.log(Level.INFO, "File size: " + fileSize + " bytes");
+
+                    if (connection.sendMessage(START_TRANSFER)) {
+                        long receivedBytes = 0;
+
+                        try {
+                            FileOutputStream fos = new FileOutputStream(getTokens().get(AvailableToken.NAME.getName()));
+
+                            while (receivedBytes < fileSize) {
+                                byte[] buff = connection.receiveBuff(BUFF_SIZE);
+                                int count = connection.getReceivedBytesCount();
+                                receivedBytes += count;
+
+                                fos.write(buff);
+                                LOGGER.log(Level.DEBUG, "Received " + count + " bytes.");
+                            }
+
+                            fos.close();
+                            LOGGER.log(Level.INFO, "File is downloaded. Total size: " + receivedBytes + " bytes.");
+                        } catch (IOException e) {
+                            LOGGER.log(Level.ERROR, e.getMessage());
+                        }
                     }
                 }
             }
@@ -103,6 +128,7 @@ public class DownloadCommand extends AbstractCommand {
 
     public enum AvailableToken {
         PATH("path", "^[\\w .-:\\\\]+$", true),
+        NAME("name", "^[\\w .-:\\\\]+$", true),
         HELP("help", null, false);
 
         private String name;

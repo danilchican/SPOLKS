@@ -5,14 +5,15 @@ import com.bsuir.danilchican.controller.Controller;
 import com.bsuir.danilchican.exception.AvailableTokenNotPresentException;
 import org.apache.logging.log4j.Level;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.Arrays;
 
 public class DownloadCommand extends AbstractCommand {
 
     private static final String SUCCESS = "success";
     private static final String START_TRANSFER = "start";
+
+    private static final int BUFF_SIZE = 256;
 
     DownloadCommand() {
         Arrays.stream(AvailableToken.values()).forEach(t -> availableTokens.put(t.getName(), t.getRegex()));
@@ -49,13 +50,20 @@ public class DownloadCommand extends AbstractCommand {
 
         if (connection != null) {
             File file = new File(path);
+            final long fileSize = file.length();
 
-            if(file.exists() && !file.isDirectory()) {
-                connection.write(SUCCESS);
+            if (file.exists() && !file.isDirectory()) {
+                connection.write(SUCCESS + " " + fileSize);
 
-                if(START_TRANSFER.equals(connection.read())) {
-                    // TODO send size of file
-                    // TODO start file transfer
+                if (START_TRANSFER.equals(connection.read())) {
+                    FileInputStream fin = new FileInputStream(file);
+                    byte fileContent[] = new byte[(int) fileSize];
+
+                    // TODO maybe try to change to send step by step
+                    fin.read(fileContent);
+                    connection.write(fileContent);
+
+                    LOGGER.log(Level.INFO, "File is transferred.");
                 } else {
                     LOGGER.log(Level.ERROR, START_TRANSFER + " flag not founded...");
                 }
@@ -70,7 +78,8 @@ public class DownloadCommand extends AbstractCommand {
     }
 
     public enum AvailableToken {
-        PATH("path", "^[\\w .-:\\\\]+$", true);
+        PATH("path", "^[\\w .-:\\\\]+$", true),
+        NAME("name", "^[\\w .-:\\\\]+$", true);
 
         private String name;
         private String regex;

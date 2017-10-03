@@ -47,6 +47,16 @@ public class Connection {
     }
 
     /**
+     * Write to stream.
+     *
+     * @param bytes
+     * @throws IOException
+     */
+    public void write(byte[] bytes) throws IOException {
+        os.write(bytes);
+    }
+
+    /**
      * Read stream data.
      *
      * @return data
