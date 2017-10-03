@@ -17,7 +17,7 @@ public class DownloadCommand extends AbstractCommand {
     private static final String SUCCESS = "success";
     private static final String START_TRANSFER = "start";
 
-    private static final int BUFF_SIZE = 256;
+    private static final int BUFF_SIZE = 5095;
 
     DownloadCommand() {
         Arrays.stream(AvailableToken.values()).forEach(t -> availableTokens.put(t.getName(), t.getRegex()));
@@ -110,7 +110,7 @@ public class DownloadCommand extends AbstractCommand {
                                 receivedBytes += count;
 
                                 fos.write(buff);
-                                LOGGER.log(Level.DEBUG, "Received " + count + " bytes.");
+                                LOGGER.log(Level.DEBUG, "Received " + receivedBytes + " bytes.");
                             }
 
                             fos.close();

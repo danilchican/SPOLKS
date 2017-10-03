@@ -13,8 +13,6 @@ public class DownloadCommand extends AbstractCommand {
     private static final String SUCCESS = "success";
     private static final String START_TRANSFER = "start";
 
-    private static final int BUFF_SIZE = 256;
-
     DownloadCommand() {
         Arrays.stream(AvailableToken.values()).forEach(t -> availableTokens.put(t.getName(), t.getRegex()));
     }
@@ -59,7 +57,7 @@ public class DownloadCommand extends AbstractCommand {
                     FileInputStream fin = new FileInputStream(file);
                     byte fileContent[] = new byte[(int) fileSize];
 
-                    // TODO maybe try to change to send step by step
+                    // TODO change to send part by part of bytes
                     fin.read(fileContent);
                     connection.write(fileContent);
 

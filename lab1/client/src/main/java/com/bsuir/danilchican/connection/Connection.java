@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class Connection {
 
@@ -59,12 +60,16 @@ public class Connection {
         try {
             socket = new Socket(serverIP, PORT);
             socket.setKeepAlive(true);
+            socket.setReuseAddress(true);
             LOGGER.log(Level.INFO, "Connected to server.");
 
             this.initStream();
             return true;
+        } catch (SocketException e) {
+            LOGGER.log(Level.ERROR, e.getMessage());
+            return false;
         } catch (IOException e) {
-            LOGGER.log(Level.ERROR, "Couldn't connect to server.");
+            LOGGER.log(Level.ERROR, "Couldn't connect to server. " + e.getMessage());
             return false;
         }
     }
