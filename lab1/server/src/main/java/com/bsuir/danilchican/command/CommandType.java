@@ -3,7 +3,8 @@ package com.bsuir.danilchican.command;
 import com.bsuir.danilchican.exception.CommandNotFoundException;
 
 public enum CommandType {
-    ECHO("echo", "Echo server", new EchoCommand());
+    ECHO("echo", "Echo server", new EchoCommand()),
+    TIME("time", "Get server time", new TimeCommand());
 
     private String commandName;
     private String description;

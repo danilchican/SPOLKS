@@ -43,6 +43,11 @@ public class TimeCommand extends AbstractCommand {
     }
 
     private void executeGettingTime(Connection connection) {
-        // TODO implement
+        if(connection.sendMessage(cmd)) {
+            String time = connection.receive();
+            LOGGER.log(Level.INFO, "Server time: " + time);
+        } else {
+            LOGGER.log(Level.ERROR, "Cannot get server time...");
+        }
     }
 }
