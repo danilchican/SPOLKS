@@ -4,7 +4,8 @@ import com.bsuir.danilchican.exception.CommandNotFoundException;
 
 public enum CommandType {
     ECHO("echo", "Echo server", new EchoCommand()),
-    TIME("time", "Get server time", new TimeCommand());
+    TIME("time", "Get server time", new TimeCommand()),
+    DOWNLOAD("download", "Download file from server", new DownloadCommand());
 
     private String commandName;
     private String description;

@@ -80,8 +80,7 @@ public class EchoCommand extends AbstractCommand {
 
         if (connection != null) {
             if (connection.sendMessage(cmd)) {
-                String receivedData = connection.receive();
-                Printer.println("Server: " + receivedData);
+                connection.receive();
             }
         } else {
             LOGGER.log(Level.WARN, "You're not connected to server.");

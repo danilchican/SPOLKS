@@ -12,6 +12,9 @@ import java.util.Map;
 
 public class DownloadCommand extends AbstractCommand {
 
+    private static final String SUCCESS = "success";
+    private static final String START_TRANSFER = "start";
+
     DownloadCommand() {
         Arrays.stream(AvailableToken.values()).forEach(t -> availableTokens.put(t.getName(), t.getRegex()));
     }
@@ -84,8 +87,15 @@ public class DownloadCommand extends AbstractCommand {
         Connection connection = Controller.getInstance().getConnection();
 
         if (connection != null) {
-            // TODO check OK or NOT
-            // TODO (OK) ? download : return;
+            if (connection.sendMessage(cmd)) {
+                String confirmation = connection.receive();
+
+                if (SUCCESS.equals(confirmation)) {
+                    if(connection.sendMessage(START_TRANSFER)) {
+                        // TODO download file from server
+                    }
+                }
+            }
         } else {
             LOGGER.log(Level.WARN, "You're not connected to server.");
         }

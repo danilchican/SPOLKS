@@ -24,7 +24,6 @@ public class EchoCommand extends AbstractCommand {
             if (content != null) {
                 executeEcho(content);
             }
-
         } catch (IOException e) {
             LOGGER.log(Level.ERROR, "Error: " + e.getMessage());
         }

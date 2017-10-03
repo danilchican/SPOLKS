@@ -91,7 +91,7 @@ public class Connection {
             int countBytes = is.read(clientMessage);
 
             String data = new String(clientMessage, 0, countBytes);
-            LOGGER.log(Level.DEBUG, "Server: " + data);
+            LOGGER.log(Level.INFO, "Server: " + data);
 
             return data;
         } catch (IOException e) {
