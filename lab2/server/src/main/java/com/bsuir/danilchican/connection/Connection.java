@@ -9,11 +9,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.Arrays;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 
 public class Connection {
 
@@ -22,14 +19,11 @@ public class Connection {
      */
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private ServerSocket socket;
+    private DatagramSocket socket;
+    private DatagramPacket packet;
 
     private static final int SIZE_BUFF = 256;
-    private static final int PORT = 1024;
-    private static final int BACKLOG = 10;
-
-    private InputStream is;
-    private OutputStream os;
+    private static final int PORT = 8033;
 
     private byte clientMessage[];
 
@@ -44,7 +38,9 @@ public class Connection {
      * @throws IOException
      */
     public void write(String data) throws IOException {
-        os.write(data.getBytes());
+        byte[] bytes = data.getBytes();
+
+        this.write(bytes, bytes.length);
     }
 
     /**
@@ -54,7 +50,13 @@ public class Connection {
      * @throws IOException
      */
     public void write(byte[] bytes, int length) throws IOException {
-        os.write(Arrays.copyOfRange(bytes, 0, length));
+        DatagramPacket packet = new DatagramPacket(
+                bytes, length,
+                this.packet.getAddress(),
+                this.packet.getPort()
+        );
+
+        socket.send(packet);
     }
 
     /**
@@ -64,9 +66,8 @@ public class Connection {
      * @throws IOException
      */
     public String read() throws IOException {
-        int countBytes = is.read(clientMessage);
-
-        return new String(clientMessage, 0, countBytes);
+        socket.receive(packet);
+        return new String(packet.getData());
     }
 
     /**
@@ -76,7 +77,7 @@ public class Connection {
      */
     public boolean open() {
         try {
-            socket = new ServerSocket(PORT, BACKLOG);
+            socket = new DatagramSocket(PORT);
             LOGGER.log(Level.INFO, "Server started.");
 
             return true;
@@ -91,57 +92,21 @@ public class Connection {
      */
     public void listen() {
         while (true) {
-            Socket client;
-
             try {
-                client = socket.accept();
+                packet = new DatagramPacket(clientMessage, SIZE_BUFF);
 
-                LOGGER.log(Level.INFO, "Client is connected!");
-                this.initStream(client);
+                String cmd = this.read();
+                LOGGER.log(Level.DEBUG, "Client: " + cmd);
 
-                while (true) {
-                    try {
-                        int countBytes;
-
-                        if ((countBytes = is.read(clientMessage)) == -1) {
-                            break;
-                        }
-
-                        String cmd = new String(clientMessage, 0, countBytes);
-                        LOGGER.log(Level.DEBUG, "Client: " + cmd);
-
-                        ICommand command = new Parser().handle(cmd);
-                        command.execute();
-                    } catch (IOException e) {
-                        LOGGER.log(Level.ERROR, "Client stopped working with server.");
-                        break;
-                    } catch (WrongCommandFormatException | CommandNotFoundException e) {
-                        LOGGER.log(Level.ERROR, "Error: " + e.getMessage());
-                    }
-                }
-
-                this.closeClientConnection(client);
-            } catch (IOException e) {
-                LOGGER.log(Level.ERROR, "Can't close connection.");
+                ICommand command = new Parser().handle(cmd);
+                command.execute();
+            } catch (WrongCommandFormatException | CommandNotFoundException | IOException e) {
+                LOGGER.log(Level.ERROR, "Error: " + e.getMessage());
             }
         }
     }
 
     public void close() throws IOException {
-        is.close();
-        os.close();
         socket.close();
-    }
-
-    private void initStream(Socket s) throws IOException {
-        is = s.getInputStream();
-        os = s.getOutputStream();
-    }
-
-    private void closeClientConnection(Socket s) throws IOException {
-        is.close();
-        os.close();
-        s.close();
-        System.out.println("Client has been disconnected!");
     }
 }

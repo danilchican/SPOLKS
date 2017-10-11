@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class ConnectCommand extends AbstractCommand {
 
-    public static final String SERVER_IP_REGEX = "^(\\d{1,3}\\.){3}\\d{1,3}$";
+    public static final String SERVER_PORT_REGEX = "^\\d+$";
 
     ConnectCommand() {
         Arrays.stream(AvailableToken.values()).forEach(t -> availableTokens.put(t.getName(), t.getRegex()));
@@ -31,7 +31,7 @@ public class ConnectCommand extends AbstractCommand {
             AvailableToken currentToken = AvailableToken.find(firstKey);
 
             switch (currentToken) {
-                case IP:
+                case PORT:
                     executeConnect();
                     break;
                 case HELP:
@@ -76,8 +76,10 @@ public class ConnectCommand extends AbstractCommand {
     }
 
     private void executeConnect() {
-        String address = getTokens().get(AvailableToken.IP.getName());
-        Connection connection = new Connection(address);
+        String portCmd = getTokens().get(AvailableToken.PORT.getName());
+        final int port = Integer.valueOf(portCmd);
+
+        Connection connection = new Connection(port);
 
         if (connection.connect()) {
             Controller.getInstance().setConnection(connection);
@@ -86,11 +88,11 @@ public class ConnectCommand extends AbstractCommand {
 
     private void executeHelp() {
         Printer.println("Command format:");
-        Printer.println("   connect -ip='192.168.0.1' [-help]");
+        Printer.println("   connect -port='8033' [-help]");
     }
 
     public enum AvailableToken {
-        IP("ip", "^(\\d{1,3}\\.){3}\\d{1,3}$", true),
+        PORT("port", SERVER_PORT_REGEX, true),
         HELP("help", null, false);
 
         private String name;
