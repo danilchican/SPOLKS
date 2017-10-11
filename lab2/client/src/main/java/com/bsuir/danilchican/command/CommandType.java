@@ -3,8 +3,8 @@ package com.bsuir.danilchican.command;
 import com.bsuir.danilchican.exception.CommandNotFoundException;
 
 public enum CommandType {
-    CONNECT("connect", "Connect to server", new ConnectCommand()),
-    DISCONNECT("disconnect", "Disconnect from server", new DisconnectCommand()),
+    INIT("init", "Init configuration", new InitCommand()),
+    CLEAR("clear", "Clear configuration", new ClearCommand()),
     DOWNLOAD("download", "Download file from server", new DownloadCommand()),
     ECHO("echo", "Check server echo", new EchoCommand()),
     TIME("time", "Get server time", new TimeCommand()),

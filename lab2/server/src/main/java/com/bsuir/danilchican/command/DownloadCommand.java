@@ -63,6 +63,12 @@ class DownloadCommand extends AbstractCommand {
 
                     while ((receivedBytes = fin.read(fileContent, 0, BUFF_SIZE)) != -1) {
                         connection.write(fileContent, receivedBytes);
+                        try {
+                            Thread.sleep(10L);
+                        } catch (InterruptedException e) {
+                            LOGGER.log(Level.WARN, "Error: " + e.getMessage());
+                        }
+
                         LOGGER.log(Level.DEBUG, "Sent " + receivedBytes + " bytes.");
                     }
 

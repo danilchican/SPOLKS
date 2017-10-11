@@ -5,7 +5,7 @@ import com.bsuir.danilchican.controller.Controller;
 import com.bsuir.danilchican.exception.WrongCommandFormatException;
 import org.apache.logging.log4j.Level;
 
-class DisconnectCommand extends AbstractCommand {
+class ClearCommand extends AbstractCommand {
 
     /**
      * Execute command.
@@ -19,9 +19,9 @@ class DisconnectCommand extends AbstractCommand {
 
             if(connection != null) {
                 connection.close();
-                LOGGER.log(Level.INFO, "You've been disconnected from server.");
+                LOGGER.log(Level.INFO, "Configuration cleared.");
             } else {
-                LOGGER.log(Level.WARN, "You're not connected to server.");
+                LOGGER.log(Level.WARN, "Configuration isn't initialized.");
             }
         } catch (WrongCommandFormatException e) {
             LOGGER.log(Level.ERROR, e.getMessage());
@@ -35,7 +35,7 @@ class DisconnectCommand extends AbstractCommand {
      */
     @Override
     public ICommand build() {
-        return new DisconnectCommand();
+        return new ClearCommand();
     }
 
     private void checkTokenCount() throws WrongCommandFormatException {

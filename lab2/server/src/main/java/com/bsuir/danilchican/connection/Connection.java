@@ -67,7 +67,7 @@ public class Connection {
      */
     public String read() throws IOException {
         socket.receive(packet);
-        return new String(packet.getData());
+        return new String(packet.getData(), 0, packet.getLength());
     }
 
     /**

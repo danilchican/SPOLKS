@@ -1,6 +1,6 @@
 package test.com.bsuir.danilchican.command;
 
-import com.bsuir.danilchican.command.ConnectCommand;
+import com.bsuir.danilchican.command.InitCommand;
 import com.bsuir.danilchican.command.ICommand;
 import com.bsuir.danilchican.exception.CommandNotFoundException;
 import com.bsuir.danilchican.exception.WrongCommandFormatException;
@@ -13,25 +13,25 @@ public class ConnectCommandTest {
     @Test
     public void validateTokenSuccess() throws WrongCommandFormatException, CommandNotFoundException {
         final String tokenValue = "8033";
-        final String cmd = "connect -" + ConnectCommand.AvailableToken.PORT.getName() + "='" + tokenValue + "'";
+        final String cmd = "init -" + InitCommand.AvailableToken.PORT.getName() + "='" + tokenValue + "'";
         final ICommand command = new Parser().handle(cmd);
 
-        boolean actual = command.validateToken(tokenValue, ConnectCommand.AvailableToken.PORT.getRegex());
+        boolean actual = command.validateToken(tokenValue, InitCommand.AvailableToken.PORT.getRegex());
         Assert.assertTrue(actual);
     }
 
     @Test
     public void validateNullToken() throws WrongCommandFormatException, CommandNotFoundException {
-        final String cmd = "connect -" + ConnectCommand.AvailableToken.PORT.getName();
+        final String cmd = "init -" + InitCommand.AvailableToken.PORT.getName();
         final ICommand command = new Parser().handle(cmd);
 
-        boolean actual = command.validateToken(null, ConnectCommand.SERVER_PORT_REGEX);
+        boolean actual = command.validateToken(null, InitCommand.SERVER_PORT_REGEX);
         Assert.assertFalse(actual);
     }
 
     @Test
     public void validateNullTokenAndNullRegex() throws WrongCommandFormatException, CommandNotFoundException {
-        final String cmd = "connect -" + ConnectCommand.AvailableToken.PORT.getName();
+        final String cmd = "init -" + InitCommand.AvailableToken.PORT.getName();
         final ICommand command = new Parser().handle(cmd);
 
         boolean actual = command.validateToken(null, null);
@@ -41,7 +41,7 @@ public class ConnectCommandTest {
     @Test
     public void validateTokensSuccess() throws WrongCommandFormatException, CommandNotFoundException {
         final String tokenValue = "8033";
-        final String cmd = "connect -" + ConnectCommand.AvailableToken.PORT.getName() + "='" + tokenValue + "'";
+        final String cmd = "init -" + InitCommand.AvailableToken.PORT.getName() + "='" + tokenValue + "'";
         final ICommand command = new Parser().handle(cmd);
 
         command.validateTokens();
@@ -49,7 +49,7 @@ public class ConnectCommandTest {
 
     @Test(expected = WrongCommandFormatException.class)
     public void validateTokens() throws WrongCommandFormatException, CommandNotFoundException {
-        final String cmd = "connect -" + ConnectCommand.AvailableToken.PORT.getName();
+        final String cmd = "init -" + InitCommand.AvailableToken.PORT.getName();
         final ICommand command = new Parser().handle(cmd);
 
         command.validateTokens();

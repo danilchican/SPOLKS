@@ -44,10 +44,10 @@ public class Connection {
      *
      * @return boolean
      */
-    public boolean connect() {
+    public boolean init() {
         try {
             socket = new DatagramSocket();
-            LOGGER.log(Level.INFO, "Connected to server.");
+            socket.setSoTimeout(1000);
 
             return true;
         } catch (SocketException e) {
@@ -92,7 +92,7 @@ public class Connection {
             DatagramPacket packet = new DatagramPacket(packetData, packetData.length);
             socket.receive(packet);
 
-            String data = new String(packet.getData());
+            String data = new String(packet.getData(), 0, packet.getLength());
             LOGGER.log(Level.INFO, "Server: " + data);
 
             return data;

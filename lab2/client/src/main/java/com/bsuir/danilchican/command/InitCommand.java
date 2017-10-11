@@ -10,11 +10,11 @@ import org.apache.logging.log4j.Level;
 import java.util.Arrays;
 import java.util.Map;
 
-public class ConnectCommand extends AbstractCommand {
+public class InitCommand extends AbstractCommand {
 
     public static final String SERVER_PORT_REGEX = "^\\d+$";
 
-    ConnectCommand() {
+    InitCommand() {
         Arrays.stream(AvailableToken.values()).forEach(t -> availableTokens.put(t.getName(), t.getRegex()));
     }
 
@@ -50,7 +50,7 @@ public class ConnectCommand extends AbstractCommand {
      */
     @Override
     public ICommand build() {
-        return new ConnectCommand();
+        return new InitCommand();
     }
 
     private void validateRequired() throws WrongCommandFormatException {
@@ -81,14 +81,14 @@ public class ConnectCommand extends AbstractCommand {
 
         Connection connection = new Connection(port);
 
-        if (connection.connect()) {
+        if (connection.init()) {
             Controller.getInstance().setConnection(connection);
         }
     }
 
     private void executeHelp() {
         Printer.println("Command format:");
-        Printer.println("   connect -port='8033' [-help]");
+        Printer.println("   init -port='8033' [-help]");
     }
 
     public enum AvailableToken {
