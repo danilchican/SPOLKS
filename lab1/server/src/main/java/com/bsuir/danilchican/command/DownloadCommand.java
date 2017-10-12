@@ -12,7 +12,7 @@ class DownloadCommand extends AbstractCommand {
     private static final String SUCCESS = "success";
     private static final String START_TRANSFER = "start";
 
-    private static final int BUFF_SIZE = 5096;
+    private static final int BUFF_SIZE = 4096;
 
     DownloadCommand() {
         Arrays.stream(AvailableToken.values()).forEach(t -> availableTokens.put(t.getName(), t.getRegex()));

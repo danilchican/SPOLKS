@@ -17,7 +17,7 @@ class DownloadCommand extends AbstractCommand {
     private static final String SUCCESS = "success";
     private static final String START_TRANSFER = "start";
 
-    private static final int BUFF_SIZE = 5096;
+    private static final int BUFF_SIZE = 4096;
 
     DownloadCommand() {
         Arrays.stream(AvailableToken.values()).forEach(t -> availableTokens.put(t.getName(), t.getRegex()));
@@ -100,6 +100,8 @@ class DownloadCommand extends AbstractCommand {
 
                     if (connection.sendMessage(START_TRANSFER)) {
                         long receivedBytes = 0;
+                        final int maxPacketsToDisplay = 25;
+                        int c = 0;
 
                         try {
                             FileOutputStream fos = new FileOutputStream(getTokens().get(AvailableToken.NAME.getName()));
@@ -116,6 +118,14 @@ class DownloadCommand extends AbstractCommand {
                                 if(receivedBytes == fileSize) {
                                     break;
                                 }
+
+                                if(c == maxPacketsToDisplay) {
+                                    LOGGER.log(Level.INFO, "Received bytes: " + receivedBytes);
+                                    c = 0;
+                                } else {
+                                    c++;
+                                }
+
                             }
 
                             fos.close();
