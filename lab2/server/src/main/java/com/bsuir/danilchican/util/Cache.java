@@ -8,7 +8,7 @@ import java.util.HashMap;
 
 public class Cache {
     private HashMap<Byte, byte[]> cache;
-    private final static int CACHE_SIZE = 20;
+    private final static int CACHE_SIZE = 10;
 
 
     /**

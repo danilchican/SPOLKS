@@ -11,7 +11,6 @@ import org.apache.logging.log4j.Level;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 public class DownloadCommand extends AbstractCommand {
@@ -20,7 +19,7 @@ public class DownloadCommand extends AbstractCommand {
     private static final String FAIL = "fail";
     private static final String START_TRANSFER = "start";
 
-    private static final int BUFF_SIZE = 4097;
+    private static final int BUFF_SIZE = 4096;
     private static long commonFileSize = 0;
     private static long receivedBytes = 0;
 
@@ -146,10 +145,10 @@ public class DownloadCommand extends AbstractCommand {
         while ((countByOnceReceiving = connection.receive(buff)) != -1 && !cache.isFull()) {
             byte index = buff[0];
             byte content[] = Arrays.copyOfRange(buff, 1, countByOnceReceiving);
-            countOnceCache += countByOnceReceiving - 1;
+            countOnceCache += content.length;
 
             cache.add(index, content);
-            LOGGER.log(Level.DEBUG, "Received " + countByOnceReceiving + " bytes.");
+            LOGGER.log(Level.DEBUG, "Received " + buff.length + " bytes.");
 
             if (receivedBytes + countOnceCache == commonFileSize) {
                 break;
@@ -158,7 +157,7 @@ public class DownloadCommand extends AbstractCommand {
             buff = new byte[BUFF_SIZE + 1];
         }
 
-        LOGGER.log(Level.DEBUG, "One cache size: " + countOnceCache + " bytes.");
+        LOGGER.log(Level.DEBUG, "Cache size: " + countOnceCache + " bytes.");
 
         if (cache.isFull() || (countOnceCache + receivedBytes) == commonFileSize) {
             LOGGER.log(Level.INFO, "Cache successfully received.");
@@ -168,8 +167,8 @@ public class DownloadCommand extends AbstractCommand {
 
             connection.sendMessage(SUCCESS);
         } else {
-            LOGGER.log(Level.ERROR, "All items of cache are not downloaded.");
-
+            LOGGER.log(Level.ERROR, "Cache not downloaded.");
+            cache.clear();
             connection.sendMessage(FAIL);
             receiveServerCache(fos);
         }

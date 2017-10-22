@@ -64,13 +64,14 @@ class DownloadCommand extends AbstractCommand {
                     FileInputStream fin = new FileInputStream(file);
 
                     receivedBytes = 0;
-                    byte indexPacket = 1;
 
                     /* Start transfer file */
 
                     int cacheIndex = 1;
 
                     do {
+                        byte indexPacket = 1;
+
                         byte[] fileContent = new byte[BUFF_SIZE + 1];
                         int onceCacheSize = 0;
                         int onceReceivingCount;
@@ -92,10 +93,10 @@ class DownloadCommand extends AbstractCommand {
 
                         sendClientCache(onceCacheSize, cacheIndex);
                         fin = new FileInputStream(file);
-                        fin.skip(onceCacheSize);
+                        fin.skip(receivedBytes);
 
                         cacheIndex++;
-                    } while (receivedBytes != fileSize);
+                    } while (receivedBytes < fileSize);
 
                     /* End transfer file */
 
@@ -122,7 +123,7 @@ class DownloadCommand extends AbstractCommand {
             LOGGER.log(Level.DEBUG, "Sent cache item[" + entry.getKey() + "] = " + entry.getValue().length + " bytes.");
 
             try {
-                Thread.sleep(10L);
+                Thread.sleep(1);
             } catch (InterruptedException e) {
                 LOGGER.log(Level.WARN, "Error: " + e.getMessage());
             }
@@ -131,7 +132,7 @@ class DownloadCommand extends AbstractCommand {
         String resultClientCache = connection.read();
 
         if (SUCCESS.equals(resultClientCache)) {
-            LOGGER.log(Level.INFO, "Cache " + cacheIndex + " sent successfully.");
+            LOGGER.log(Level.INFO, "Cache " + cacheIndex + " sent successfully. Size: " + oneCacheSize);
             cache.clear();
             receivedBytes += oneCacheSize;
         } else {

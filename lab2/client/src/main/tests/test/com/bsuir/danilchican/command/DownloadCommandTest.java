@@ -13,8 +13,8 @@ public class DownloadCommandTest {
     @Test
     public void downloadTest() throws WrongCommandFormatException, CommandNotFoundException {
         final String tokenPort = "8033";
-        final String tokenPath = "d:/psp_lab2.rar";
-        final String tokenName = "d:/down.rar";
+        final String tokenPath = "d:/allin.zip";
+        final String tokenName = "d:/down.zip";
 
         final String initCmd = "init -" + InitCommand.AvailableToken.PORT.getName() + "='" + tokenPort + "'";
         final String downloadCmd = "download -" + DownloadCommand.AvailableToken.PATH.getName() + "='" + tokenPath + "' -"
