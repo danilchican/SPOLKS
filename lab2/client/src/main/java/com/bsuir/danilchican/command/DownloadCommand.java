@@ -4,22 +4,30 @@ import com.bsuir.danilchican.connection.Connection;
 import com.bsuir.danilchican.controller.Controller;
 import com.bsuir.danilchican.exception.AvailableTokenNotPresentException;
 import com.bsuir.danilchican.exception.WrongCommandFormatException;
+import com.bsuir.danilchican.util.Cache;
 import com.bsuir.danilchican.util.Printer;
 import org.apache.logging.log4j.Level;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
-class DownloadCommand extends AbstractCommand {
+public class DownloadCommand extends AbstractCommand {
 
     private static final String SUCCESS = "success";
+    private static final String FAIL = "fail";
     private static final String START_TRANSFER = "start";
 
-    private static final int BUFF_SIZE = 5096;
+    private static final int BUFF_SIZE = 4097;
+    private static long commonFileSize = 0;
+    private static long receivedBytes = 0;
+
+    private Cache cache;
 
     DownloadCommand() {
+        cache = new Cache();
         Arrays.stream(AvailableToken.values()).forEach(t -> availableTokens.put(t.getName(), t.getRegex()));
     }
 
@@ -95,31 +103,26 @@ class DownloadCommand extends AbstractCommand {
                 String[] confirmation = connection.receive().split(" ");
 
                 if (SUCCESS.equals(confirmation[0])) {
-                    final long fileSize = Long.parseLong(confirmation[1]);
-                    LOGGER.log(Level.INFO, "File size: " + fileSize + " bytes");
+                    commonFileSize = Long.parseLong(confirmation[1]);
+
+                    LOGGER.log(Level.INFO, "File size: " + commonFileSize + " bytes");
 
                     if (connection.sendMessage(START_TRANSFER)) {
-                        long receivedBytes = 0;
-
                         try {
                             FileOutputStream fos = new FileOutputStream(getTokens().get(AvailableToken.NAME.getName()));
 
-                            byte[] buff = new byte[BUFF_SIZE];
-                            int count;
+                            /* Start receiving file */
 
-                            while ((count = connection.receive(buff)) != -1) {
-                                receivedBytes += count;
-                                fos.write(Arrays.copyOfRange(buff, 0, count));
+                            do {
+                                receiveServerCache(fos);
+                            } while (receivedBytes != commonFileSize);
 
-                                LOGGER.log(Level.DEBUG, "Received " + receivedBytes + " bytes.");
-
-                                if(receivedBytes == fileSize) {
-                                    break;
-                                }
-                            }
+                            /* End receiving file */
 
                             fos.close();
                             LOGGER.log(Level.INFO, "File is downloaded. Total size: " + receivedBytes + " bytes.");
+                            receivedBytes = 0;
+                            commonFileSize = 0;
                         } catch (IOException e) {
                             LOGGER.log(Level.ERROR, e.getMessage());
                         }
@@ -131,7 +134,58 @@ class DownloadCommand extends AbstractCommand {
         }
     }
 
-    private enum AvailableToken {
+    private void receiveServerCache(FileOutputStream fos) throws IOException {
+        Connection connection = Controller.getInstance().getConnection();
+        LOGGER.log(Level.INFO, "Starting to receiver cache from server.");
+
+        int countOnceCache = 0;
+        int countByOnceReceiving;
+
+        byte[] buff = new byte[BUFF_SIZE + 1];
+
+        while ((countByOnceReceiving = connection.receive(buff)) != -1 && !cache.isFull()) {
+            byte index = buff[0];
+            byte content[] = Arrays.copyOfRange(buff, 1, countByOnceReceiving);
+            countOnceCache += countByOnceReceiving - 1;
+
+            cache.add(index, content);
+            LOGGER.log(Level.DEBUG, "Received " + countByOnceReceiving + " bytes.");
+
+            if (receivedBytes + countOnceCache == commonFileSize) {
+                break;
+            }
+
+            buff = new byte[BUFF_SIZE + 1];
+        }
+
+        LOGGER.log(Level.DEBUG, "One cache size: " + countOnceCache + " bytes.");
+
+        if (cache.isFull() || (countOnceCache + receivedBytes) == commonFileSize) {
+            LOGGER.log(Level.INFO, "Cache successfully received.");
+
+            receivedBytes += countOnceCache;
+            writeFromCache(fos);
+
+            connection.sendMessage(SUCCESS);
+        } else {
+            LOGGER.log(Level.ERROR, "All items of cache are not downloaded.");
+
+            connection.sendMessage(FAIL);
+            receiveServerCache(fos);
+        }
+    }
+
+    private void writeFromCache(FileOutputStream fos) throws IOException {
+        LOGGER.log(Level.INFO, "Writing from cache to file...");
+
+        for (Map.Entry<Byte, byte[]> item : cache.get().entrySet()) {
+            fos.write(item.getValue());
+        }
+
+        cache.clear();
+    }
+
+    public enum AvailableToken {
         PATH("path", "^[\\w .-:\\\\]+$", true),
         NAME("name", "^[\\w .-:\\\\]+$", true),
         HELP("help", null, false);

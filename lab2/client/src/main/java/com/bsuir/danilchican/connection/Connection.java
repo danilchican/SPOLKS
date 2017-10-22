@@ -110,7 +110,7 @@ public class Connection {
             return packet.getLength();
         } catch (IOException e) {
             LOGGER.log(Level.ERROR, "Error: " + e.getMessage());
-            return 0;
+            return -1;
         }
     }
 
