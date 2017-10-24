@@ -53,26 +53,26 @@ class DownloadCommand extends AbstractCommand {
             final long fileSize = file.length();
 
             if (file.exists() && !file.isDirectory()) {
-                connection.write(SUCCESS + " " + fileSize);
+                //connection.write(SUCCESS + " " + fileSize);
 
-                if (START_TRANSFER.equals(connection.read())) {
-                    FileInputStream fin = new FileInputStream(file);
-
-                    int receivedBytes;
-                    byte fileContent[] = new byte[BUFF_SIZE];
-
-                    while ((receivedBytes = fin.read(fileContent, 0, BUFF_SIZE)) != -1) {
-                        connection.write(fileContent, receivedBytes);
-                        LOGGER.log(Level.DEBUG, "Sent " + receivedBytes + " bytes.");
-                    }
-
-                    LOGGER.log(Level.INFO, "File is transferred.");
-                } else {
-                    LOGGER.log(Level.ERROR, START_TRANSFER + " flag not founded...");
-                }
+//                if (START_TRANSFER.equals(connection.read())) {
+//                    FileInputStream fin = new FileInputStream(file);
+//
+//                    int receivedBytes;
+//                    byte fileContent[] = new byte[BUFF_SIZE];
+//
+//                    while ((receivedBytes = fin.read(fileContent, 0, BUFF_SIZE)) != -1) {
+//                        connection.write(fileContent, receivedBytes);
+//                        LOGGER.log(Level.DEBUG, "Sent " + receivedBytes + " bytes.");
+//                    }
+//
+//                    LOGGER.log(Level.INFO, "File is transferred.");
+//                } else {
+//                    LOGGER.log(Level.ERROR, START_TRANSFER + " flag not founded...");
+//                }
             } else {
                 final String message = "File does not exists or something went wrong.";
-                connection.write(message);
+               // connection.write(message);
                 LOGGER.log(Level.ERROR, message);
             }
         } else {

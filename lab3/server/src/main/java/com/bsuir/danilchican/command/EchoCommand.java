@@ -41,7 +41,7 @@ public class EchoCommand extends AbstractCommand {
 
     private void executeEcho(String content) throws IOException {
         Connection connection = Controller.getInstance().getConnection();
-        connection.write(content);
+        //connection.write(content);
     }
 
     private enum AvailableToken {

@@ -1,19 +1,15 @@
 package com.bsuir.danilchican.connection;
 
-import com.bsuir.danilchican.command.ICommand;
-import com.bsuir.danilchican.exception.CommandNotFoundException;
-import com.bsuir.danilchican.exception.WrongCommandFormatException;
-import com.bsuir.danilchican.parser.Parser;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.Arrays;
+import java.net.InetSocketAddress;
+import java.nio.channels.*;
+import java.util.HashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Connection {
 
@@ -22,51 +18,18 @@ public class Connection {
      */
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private ServerSocket socket;
+    private static final String ADDRESS = "localhost";
 
-    private static final int SIZE_BUFF = 256;
     private static final int PORT = 1024;
-    private static final int BACKLOG = 10;
+    private static final int LISTEN_PERIOD_TIME_MS = 500;
 
-    private InputStream is;
-    private OutputStream os;
+    static HashMap<SelectionKey, ClientSession> clientMap = new HashMap<>();
 
-    private byte clientMessage[];
+    private ServerSocketChannel serverChannel;
+    private Selector selector;
+    private SelectionKey serverKey;
 
     public Connection() {
-        clientMessage = new byte[SIZE_BUFF];
-    }
-
-    /**
-     * Write to stream.
-     *
-     * @param data
-     * @throws IOException
-     */
-    public void write(String data) throws IOException {
-        os.write(data.getBytes());
-    }
-
-    /**
-     * Write to stream.
-     *
-     * @param bytes
-     * @throws IOException
-     */
-    public void write(byte[] bytes, int length) throws IOException {
-        os.write(Arrays.copyOfRange(bytes, 0, length));
-    }
-
-    /**
-     * Read stream data.
-     *
-     * @return data
-     * @throws IOException
-     */
-    public String read() throws IOException {
-        int countBytes = is.read(clientMessage);
-
-        return new String(clientMessage, 0, countBytes);
     }
 
     /**
@@ -76,7 +39,13 @@ public class Connection {
      */
     public boolean open() {
         try {
-            socket = new ServerSocket(PORT, BACKLOG);
+            InetSocketAddress sockAddr = new InetSocketAddress(ADDRESS, PORT);
+
+            serverChannel = ServerSocketChannel.open();
+            serverChannel.configureBlocking(false);
+            serverKey = serverChannel.register(selector = Selector.open(), SelectionKey.OP_ACCEPT);
+            serverChannel.bind(sockAddr);
+
             LOGGER.log(Level.INFO, "Server started.");
 
             return true;
@@ -90,58 +59,57 @@ public class Connection {
      * Listen for clients.
      */
     public void listen() {
-        while (true) {
-            Socket client;
-
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
             try {
-                client = socket.accept();
+                listenExecutor();
+            } catch (IOException e) {
+                LOGGER.log(Level.ERROR, e.getMessage());
+            }
+        }, 0, LISTEN_PERIOD_TIME_MS, TimeUnit.MILLISECONDS);
+    }
 
-                LOGGER.log(Level.INFO, "Client is connected!");
-                this.initStream(client);
+    private void listenExecutor() throws IOException {
+        selector.selectNow();
 
-                while (true) {
-                    try {
-                        int countBytes;
-
-                        if ((countBytes = is.read(clientMessage)) == -1) {
-                            break;
-                        }
-
-                        String cmd = new String(clientMessage, 0, countBytes);
-                        LOGGER.log(Level.DEBUG, "Client: " + cmd);
-
-                        ICommand command = new Parser().handle(cmd);
-                        command.execute();
-                    } catch (IOException e) {
-                        LOGGER.log(Level.ERROR, "Client stopped working with server.");
-                        break;
-                    } catch (WrongCommandFormatException | CommandNotFoundException e) {
-                        LOGGER.log(Level.ERROR, "Error: " + e.getMessage());
-                    }
+        for (SelectionKey key : selector.selectedKeys()) {
+            try {
+                if (!key.isValid()) {
+                    LOGGER.log(Level.WARN, "Key is invalid...");
+                    continue;
                 }
 
-                this.closeClientConnection(client);
+                if (key == serverKey) {
+                    SocketChannel acceptedChannel = serverChannel.accept();
+
+                    if (acceptedChannel == null) {
+                        LOGGER.log(Level.ERROR, "Accepted channel is null.");
+                        continue;
+                    }
+
+                    acceptedChannel.configureBlocking(false);
+                    SelectionKey readKey = acceptedChannel.register(selector, SelectionKey.OP_READ);
+                    clientMap.put(readKey, new ClientSession(readKey, acceptedChannel));
+
+                    LOGGER.log(Level.INFO, "Client " + acceptedChannel.getRemoteAddress() + " connected.");
+                    LOGGER.log(Level.INFO, "Total clients: " + clientMap.size());
+                }
+
+                if (key.isReadable()) {
+                    ClientSession session = clientMap.get(key);
+
+                    if (session == null) {
+                        LOGGER.log(Level.ERROR, "Client session not found.");
+                        continue;
+                    }
+
+                    session.read();
+                }
+
             } catch (IOException e) {
-                LOGGER.log(Level.ERROR, "Can't close connection.");
+                LOGGER.log(Level.ERROR, e.getMessage());
             }
         }
-    }
 
-    public void close() throws IOException {
-        is.close();
-        os.close();
-        socket.close();
-    }
-
-    private void initStream(Socket s) throws IOException {
-        is = s.getInputStream();
-        os = s.getOutputStream();
-    }
-
-    private void closeClientConnection(Socket s) throws IOException {
-        is.close();
-        os.close();
-        s.close();
-        System.out.println("Client has been disconnected!");
+        selector.selectedKeys().clear();
     }
 }

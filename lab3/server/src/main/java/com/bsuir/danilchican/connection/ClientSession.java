@@ -5,7 +5,6 @@ import com.bsuir.danilchican.exception.CommandNotFoundException;
 import com.bsuir.danilchican.exception.WrongCommandFormatException;
 import com.bsuir.danilchican.parser.Parser;
 import com.bsuir.danilchican.util.SocketBuffer;
-import com.sun.javaws.Main;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,16 +13,15 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-import java.util.Arrays;
 
-class ClientSession {
+public class ClientSession {
 
     /**
      * Logger to getCommand logs.
      */
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private static final int SIZE_BUFF = 256;
+    public static final int SIZE_BUFF = 256;
 
     private SelectionKey selkey;
     private SocketChannel channel;
@@ -36,7 +34,7 @@ class ClientSession {
     }
 
     private void disconnect() {
-        AsyncConnection.clientMap.remove(selkey);
+        Connection.clientMap.remove(selkey);
 
         try {
             if (selkey != null) {
@@ -73,13 +71,7 @@ class ClientSession {
             LOGGER.log(Level.DEBUG, "Client: " + cmd);
 
             ICommand command = new Parser().handle(cmd);
-            command.setBuffer(buffer);
-            LOGGER.log(Level.INFO, "Worked " + cmd);
-
-            // use it!
-//            buffer.flip(); // flip to clear and send to client
-//            channel.write(buffer);
-
+            command.setChannel(channel);
             command.execute();
         } catch (IOException e) {
             LOGGER.log(Level.ERROR, e.getMessage());

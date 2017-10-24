@@ -3,6 +3,7 @@ package com.bsuir.danilchican.command;
 import com.bsuir.danilchican.exception.WrongCommandFormatException;
 import com.bsuir.danilchican.util.SocketBuffer;
 
+import java.nio.channels.SocketChannel;
 import java.util.Map;
 
 public interface ICommand {
@@ -33,10 +34,10 @@ public interface ICommand {
     void verifyTokens() throws WrongCommandFormatException;
 
     /**
-     * Set command buffer.
-     * @param buffer
+     * Set command channel.
+     * @param channel
      */
-    void setBuffer(SocketBuffer buffer);
+    void setChannel(SocketChannel channel);
 
     /**
      * Build command instance.
