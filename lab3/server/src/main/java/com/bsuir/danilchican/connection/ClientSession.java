@@ -73,14 +73,14 @@ class ClientSession {
             LOGGER.log(Level.DEBUG, "Client: " + cmd);
 
             ICommand command = new Parser().handle(cmd);
-
+            command.setBuffer(buffer);
             LOGGER.log(Level.INFO, "Worked " + cmd);
 
             // use it!
 //            buffer.flip(); // flip to clear and send to client
 //            channel.write(buffer);
 
-            //command.execute();
+            command.execute();
         } catch (IOException e) {
             LOGGER.log(Level.ERROR, e.getMessage());
             disconnect();

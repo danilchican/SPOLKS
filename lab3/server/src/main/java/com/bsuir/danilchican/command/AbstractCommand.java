@@ -1,6 +1,7 @@
 package com.bsuir.danilchican.command;
 
 import com.bsuir.danilchican.exception.WrongCommandFormatException;
+import com.bsuir.danilchican.util.SocketBuffer;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,6 +13,8 @@ abstract class AbstractCommand implements ICommand {
 
     Map<String, String> availableTokens;
     private Map<String, String> tokens;
+
+    private SocketBuffer buffer;
 
     /**
      * Logger to getCommand logs.
@@ -42,6 +45,11 @@ abstract class AbstractCommand implements ICommand {
                 }
             }
         }
+    }
+
+    @Override
+    public void setBuffer(SocketBuffer buffer) {
+        this.buffer = buffer;
     }
 
     /**

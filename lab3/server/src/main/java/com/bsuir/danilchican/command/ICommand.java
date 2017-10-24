@@ -1,6 +1,7 @@
 package com.bsuir.danilchican.command;
 
 import com.bsuir.danilchican.exception.WrongCommandFormatException;
+import com.bsuir.danilchican.util.SocketBuffer;
 
 import java.util.Map;
 
@@ -30,6 +31,12 @@ public interface ICommand {
      * Verify inputted tokens.
      */
     void verifyTokens() throws WrongCommandFormatException;
+
+    /**
+     * Set command buffer.
+     * @param buffer
+     */
+    void setBuffer(SocketBuffer buffer);
 
     /**
      * Build command instance.
