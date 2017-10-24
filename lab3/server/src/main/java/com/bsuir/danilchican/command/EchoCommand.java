@@ -5,6 +5,7 @@ import com.bsuir.danilchican.controller.Controller;
 import org.apache.logging.log4j.Level;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class EchoCommand extends AbstractCommand {
@@ -40,8 +41,8 @@ public class EchoCommand extends AbstractCommand {
     }
 
     private void executeEcho(String content) throws IOException {
-        Connection connection = Controller.getInstance().getConnection();
-        //connection.write(content);
+        ByteBuffer buff = ByteBuffer.wrap(content.getBytes());
+        channel.write(buff);
     }
 
     private enum AvailableToken {
