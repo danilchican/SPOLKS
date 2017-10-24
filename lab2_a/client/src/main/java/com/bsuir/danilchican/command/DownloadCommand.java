@@ -115,7 +115,7 @@ class DownloadCommand extends AbstractCommand {
                                 int urgentPos = hasUrgentData(tempData);
 
                                 if (urgentPos != -1) {
-                                    LOGGER.log(Level.INFO, "Received urgent data: " + (char) tempData[0]);
+                                    LOGGER.log(Level.INFO, "Received urgent data.");
 
                                     if (tempData.length == 1) {
                                         continue;

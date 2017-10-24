@@ -13,8 +13,8 @@ public class DownloadCommandTest {
     @Test
     public void downloadTest() throws WrongCommandFormatException, CommandNotFoundException {
         final String tokenPort = "8033";
-        final String tokenPath = "d:/allin.zip";
-        final String tokenName = "d:/down.zip";
+        final String tokenPath = "d:/ubuntu.tar.gz";
+        final String tokenName = "d:/sdacdgha.tar.gz";
 
         final String initCmd = "init -" + InitCommand.AvailableToken.PORT.getName() + "='" + tokenPort + "'";
         final String downloadCmd = "download -" + DownloadCommand.AvailableToken.PATH.getName() + "='" + tokenPath + "' -"

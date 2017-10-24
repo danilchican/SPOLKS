@@ -135,7 +135,7 @@ public class DownloadCommand extends AbstractCommand {
 
     private void receiveServerCache(FileOutputStream fos) throws IOException {
         Connection connection = Controller.getInstance().getConnection();
-        LOGGER.log(Level.INFO, "Starting to receiver cache from server.");
+        //LOGGER.log(Level.INFO, "Starting to receiver cache from server.");
 
         int countOnceCache = 0;
         int countByOnceReceiving;
@@ -148,7 +148,7 @@ public class DownloadCommand extends AbstractCommand {
             countOnceCache += content.length;
 
             cache.add(index, content);
-            LOGGER.log(Level.DEBUG, "Received " + buff.length + " bytes.");
+            //LOGGER.log(Level.DEBUG, "Received " + buff.length + " bytes.");
 
             if (receivedBytes + countOnceCache == commonFileSize) {
                 break;
@@ -157,17 +157,17 @@ public class DownloadCommand extends AbstractCommand {
             buff = new byte[BUFF_SIZE + 1];
         }
 
-        LOGGER.log(Level.DEBUG, "Cache size: " + countOnceCache + " bytes.");
+        //LOGGER.log(Level.DEBUG, "Cache size: " + countOnceCache + " bytes.");
 
         if (cache.isFull() || (countOnceCache + receivedBytes) == commonFileSize) {
-            LOGGER.log(Level.INFO, "Cache successfully received.");
+            //LOGGER.log(Level.INFO, "Cache successfully received.");
 
             receivedBytes += countOnceCache;
             writeFromCache(fos);
 
             connection.sendMessage(SUCCESS);
         } else {
-            LOGGER.log(Level.ERROR, "Cache not downloaded.");
+           // LOGGER.log(Level.ERROR, "Cache not downloaded.");
             cache.clear();
             connection.sendMessage(FAIL);
             receiveServerCache(fos);
@@ -175,7 +175,7 @@ public class DownloadCommand extends AbstractCommand {
     }
 
     private void writeFromCache(FileOutputStream fos) throws IOException {
-        LOGGER.log(Level.INFO, "Writing from cache to file...");
+       // LOGGER.log(Level.INFO, "Writing from cache to file...");
 
         for (Map.Entry<Byte, byte[]> item : cache.get().entrySet()) {
             fos.write(item.getValue());

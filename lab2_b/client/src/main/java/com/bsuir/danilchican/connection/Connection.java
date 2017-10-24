@@ -68,7 +68,7 @@ public class Connection {
         try {
             DatagramPacket packetSend = new DatagramPacket(
                     bytes, bytes.length,
-                    InetAddress.getLocalHost(), port
+                    InetAddress.getByName("192.168.43.30"), port
             );
 
             socket.send(packetSend);
@@ -109,7 +109,7 @@ public class Connection {
 
             return packet.getLength();
         } catch (IOException e) {
-            LOGGER.log(Level.WARN, e.getMessage());
+           // LOGGER.log(Level.WARN, e.getMessage());
             return -1;
         }
     }

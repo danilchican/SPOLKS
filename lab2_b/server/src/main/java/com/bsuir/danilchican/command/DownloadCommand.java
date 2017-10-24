@@ -69,6 +69,7 @@ class DownloadCommand extends AbstractCommand {
 
                     int cacheIndex = 1;
 
+                    LOGGER.log(Level.INFO, "File transter started.");
                     do {
                         byte indexPacket = 1;
 
@@ -116,11 +117,11 @@ class DownloadCommand extends AbstractCommand {
 
     private void sendClientCache(int oneCacheSize, int cacheIndex) throws IOException {
         Connection connection = Controller.getInstance().getConnection();
-        LOGGER.log(Level.INFO, "Starting to send cache " + cacheIndex + " to client.");
+        //LOGGER.log(Level.INFO, "Starting to send cache " + cacheIndex + " to client.");
 
         for (Map.Entry<Byte, byte[]> entry : cache.get().entrySet()) {
             connection.write(entry.getValue(), entry.getValue().length);
-            LOGGER.log(Level.DEBUG, "Sent cache item[" + entry.getKey() + "] = " + entry.getValue().length + " bytes.");
+            //LOGGER.log(Level.DEBUG, "Sent cache item[" + entry.getKey() + "] = " + entry.getValue().length + " bytes.");
 
             try {
                 Thread.sleep(1);
@@ -132,11 +133,11 @@ class DownloadCommand extends AbstractCommand {
         String resultClientCache = connection.read();
 
         if (SUCCESS.equals(resultClientCache)) {
-            LOGGER.log(Level.INFO, "Cache " + cacheIndex + " sent successfully. Size: " + oneCacheSize);
+            ///LOGGER.log(Level.INFO, "Cache " + cacheIndex + " sent successfully. Size: " + oneCacheSize);
             cache.clear();
             receivedBytes += oneCacheSize;
         } else {
-            LOGGER.log(Level.ERROR, "Trying to send cache " + cacheIndex + " once again.");
+           // LOGGER.log(Level.ERROR, "Trying to send cache " + cacheIndex + " once again.");
             sendClientCache(oneCacheSize, cacheIndex);
         }
     }
