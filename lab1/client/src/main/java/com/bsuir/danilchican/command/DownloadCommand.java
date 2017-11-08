@@ -114,12 +114,13 @@ class DownloadCommand extends AbstractCommand {
                                 fos.write(Arrays.copyOfRange(buff, 0, count));
 
                                 LOGGER.log(Level.DEBUG, "Received " + receivedBytes + " bytes.");
+                                Thread.sleep(4);
 
-                                if(receivedBytes == fileSize) {
+                                if (receivedBytes == fileSize) {
                                     break;
                                 }
 
-                                if(receivedBytes >= middleOfFileSize && !had50Percents) {
+                                if (receivedBytes >= middleOfFileSize && !had50Percents) {
                                     LOGGER.log(Level.INFO, "Received 50%...");
                                     had50Percents = true;
                                 }
@@ -127,7 +128,7 @@ class DownloadCommand extends AbstractCommand {
 
                             fos.close();
                             LOGGER.log(Level.INFO, "File is downloaded. Total size: " + receivedBytes + " bytes.");
-                        } catch (IOException e) {
+                        } catch (IOException | InterruptedException e) {
                             LOGGER.log(Level.ERROR, e.getMessage());
                         }
                     }

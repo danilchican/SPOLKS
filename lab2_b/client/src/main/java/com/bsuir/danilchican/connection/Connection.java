@@ -17,6 +17,8 @@ public class Connection {
 
     private static final int SIZE_BUFF = 256;
     private int port = 8033;
+    public static final String IP = "192.168.10.10";
+    //public static final String IP = "127.0.0.1";
 
     private DatagramSocket socket;
 
@@ -47,7 +49,7 @@ public class Connection {
     public boolean init() {
         try {
             socket = new DatagramSocket();
-            socket.setSoTimeout(1000);
+            socket.setSoTimeout(300);
 
             return true;
         } catch (SocketException e) {
@@ -68,7 +70,7 @@ public class Connection {
         try {
             DatagramPacket packetSend = new DatagramPacket(
                     bytes, bytes.length,
-                    InetAddress.getByName("192.168.43.30"), port
+                    InetAddress.getByName(IP), port
             );
 
             socket.send(packetSend);

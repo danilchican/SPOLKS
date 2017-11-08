@@ -19,7 +19,7 @@ public class DownloadCommand extends AbstractCommand {
     private static final String FAIL = "fail";
     private static final String START_TRANSFER = "start";
 
-    private static final int BUFF_SIZE = 4096;
+    private static final int BUFF_SIZE = 59_152;
     private static long commonFileSize = 0;
     private static long receivedBytes = 0;
 
@@ -104,6 +104,9 @@ public class DownloadCommand extends AbstractCommand {
                 if (SUCCESS.equals(confirmation[0])) {
                     commonFileSize = Long.parseLong(confirmation[1]);
 
+                    final long middleOfFileSize = commonFileSize / 2;
+                    boolean had50Percents = false;
+
                     LOGGER.log(Level.INFO, "File size: " + commonFileSize + " bytes");
 
                     if (connection.sendMessage(START_TRANSFER)) {
@@ -114,6 +117,11 @@ public class DownloadCommand extends AbstractCommand {
 
                             do {
                                 receiveServerCache(fos);
+
+                                if(receivedBytes >= middleOfFileSize && !had50Percents) {
+                                    LOGGER.log(Level.INFO, "Received 50%...");
+                                    had50Percents = true;
+                                }
                             } while (receivedBytes != commonFileSize);
 
                             /* End receiving file */
@@ -135,7 +143,7 @@ public class DownloadCommand extends AbstractCommand {
 
     private void receiveServerCache(FileOutputStream fos) throws IOException {
         Connection connection = Controller.getInstance().getConnection();
-        //LOGGER.log(Level.INFO, "Starting to receiver cache from server.");
+        LOGGER.log(Level.DEBUG, "Starting to receiver cache from server.");
 
         int countOnceCache = 0;
         int countByOnceReceiving;
@@ -148,7 +156,7 @@ public class DownloadCommand extends AbstractCommand {
             countOnceCache += content.length;
 
             cache.add(index, content);
-            //LOGGER.log(Level.DEBUG, "Received " + buff.length + " bytes.");
+            LOGGER.log(Level.DEBUG, "Received " + buff.length + " bytes.");
 
             if (receivedBytes + countOnceCache == commonFileSize) {
                 break;
@@ -157,17 +165,17 @@ public class DownloadCommand extends AbstractCommand {
             buff = new byte[BUFF_SIZE + 1];
         }
 
-        //LOGGER.log(Level.DEBUG, "Cache size: " + countOnceCache + " bytes.");
+        LOGGER.log(Level.DEBUG, "Cache size: " + countOnceCache + " bytes.");
 
         if (cache.isFull() || (countOnceCache + receivedBytes) == commonFileSize) {
-            //LOGGER.log(Level.INFO, "Cache successfully received.");
+            LOGGER.log(Level.DEBUG, "Cache successfully received.");
 
             receivedBytes += countOnceCache;
             writeFromCache(fos);
 
             connection.sendMessage(SUCCESS);
         } else {
-           // LOGGER.log(Level.ERROR, "Cache not downloaded.");
+            LOGGER.log(Level.ERROR, "Cache not downloaded.");
             cache.clear();
             connection.sendMessage(FAIL);
             receiveServerCache(fos);
@@ -175,8 +183,6 @@ public class DownloadCommand extends AbstractCommand {
     }
 
     private void writeFromCache(FileOutputStream fos) throws IOException {
-       // LOGGER.log(Level.INFO, "Writing from cache to file...");
-
         for (Map.Entry<Byte, byte[]> item : cache.get().entrySet()) {
             fos.write(item.getValue());
         }

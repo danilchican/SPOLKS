@@ -12,16 +12,16 @@ public class DownloadCommandTest {
 
     @Test
     public void download() throws WrongCommandFormatException, CommandNotFoundException {
-        final String tokenValue = "127.0.0.1";
-        String cmd = "connect -" + ConnectCommand.AvailableToken.IP.getName() + "='" + tokenValue + "'";
+        String IP = "192.168.10.10";
+        String cmd = "connect -" + ConnectCommand.AvailableToken.IP.getName() + "='" + IP + "'";
         ICommand command = new Parser().handle(cmd);
 
-        boolean actual = command.validateToken(tokenValue, ConnectCommand.AvailableToken.IP.getRegex());
+        boolean actual = command.validateToken(IP, ConnectCommand.AvailableToken.IP.getRegex());
         Assert.assertTrue(actual);
 
         command.execute();
 
-        cmd = "download -path='d:/spolks/text.txt' -name='d:/spolks/test_2_a.txt'";
+        cmd = "download -path='d:/data.txt' -name='d:/spolks/test_2_a_finish.txt'";
         command = new Parser().handle(cmd);
         command.execute();
     }

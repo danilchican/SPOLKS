@@ -7,20 +7,11 @@
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="${pattern}"/>
         </Console>
-        <RollingFile name="File" fileName="logs/debug.log" append="true"
-                     filePattern="logs/${date:yyyy-MM}/debug-%d{yyyy-MM-dd}-%i.txt">
-            <PatternLayout pattern="${pattern}"/>
-            <Policies>
-                <TimeBasedTriggeringPolicy />
-                <SizeBasedTriggeringPolicy size="50 KB" />
-            </Policies>
-        </RollingFile>
     </Appenders>
 
     <Loggers>
         <Root level="INFO">
             <AppenderRef ref="Console"/>
-            <AppenderRef ref="File"/>
         </Root>
     </Loggers>
 

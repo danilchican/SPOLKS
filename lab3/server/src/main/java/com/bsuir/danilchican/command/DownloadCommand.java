@@ -2,9 +2,11 @@ package com.bsuir.danilchican.command;
 
 import com.bsuir.danilchican.connection.Connection;
 import com.bsuir.danilchican.controller.Controller;
+import com.bsuir.danilchican.util.SocketBuffer;
 import org.apache.logging.log4j.Level;
 
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 class DownloadCommand extends AbstractCommand {
@@ -12,7 +14,7 @@ class DownloadCommand extends AbstractCommand {
     private static final String SUCCESS = "success";
     private static final String START_TRANSFER = "start";
 
-    private static final int BUFF_SIZE = 4096;
+    private static final int BUFF_SIZE = 12288;
 
     DownloadCommand() {
         Arrays.stream(AvailableToken.values()).forEach(t -> availableTokens.put(t.getName(), t.getRegex()));
@@ -53,26 +55,43 @@ class DownloadCommand extends AbstractCommand {
             final long fileSize = file.length();
 
             if (file.exists() && !file.isDirectory()) {
-                //connection.write(SUCCESS + " " + fileSize);
+                String message = SUCCESS + " " + fileSize;
+                ByteBuffer buff = ByteBuffer.wrap(message.getBytes());
+                channel.write(buff);
 
-//                if (START_TRANSFER.equals(connection.read())) {
-//                    FileInputStream fin = new FileInputStream(file);
-//
-//                    int receivedBytes;
-//                    byte fileContent[] = new byte[BUFF_SIZE];
-//
-//                    while ((receivedBytes = fin.read(fileContent, 0, BUFF_SIZE)) != -1) {
-//                        connection.write(fileContent, receivedBytes);
-//                        LOGGER.log(Level.DEBUG, "Sent " + receivedBytes + " bytes.");
-//                    }
-//
-//                    LOGGER.log(Level.INFO, "File is transferred.");
-//                } else {
-//                    LOGGER.log(Level.ERROR, START_TRANSFER + " flag not founded...");
-//                }
+                SocketBuffer buffer = new SocketBuffer();
+                int countBytes;
+
+                // TODO error not wait
+                if ((countBytes = channel.read((ByteBuffer) buffer.clear())) < 1) {
+                    LOGGER.log(Level.ERROR, "Buffer is clear.");
+                    return;
+                }
+
+                byte[] tempData = buffer.read(countBytes);
+                String cmd = new String(tempData, 0, countBytes);
+
+                if (START_TRANSFER.equals(cmd)) {
+                    FileInputStream fin = new FileInputStream(file);
+
+                    int receivedBytes;
+                    byte fileContent[] = new byte[BUFF_SIZE];
+
+                    while ((receivedBytes = fin.read(fileContent, 0, BUFF_SIZE)) != -1) {
+                        ByteBuffer buffToWrite = ByteBuffer.wrap(fileContent);
+                        channel.write(buffToWrite);
+                        LOGGER.log(Level.DEBUG, "Sent " + receivedBytes + " bytes.");
+                    }
+
+                    LOGGER.log(Level.INFO, "File is transferred.");
+                } else {
+                    LOGGER.log(Level.ERROR, START_TRANSFER + " flag not founded...");
+                }
             } else {
                 final String message = "File does not exists or something went wrong.";
-               // connection.write(message);
+                ByteBuffer buff = ByteBuffer.wrap(message.getBytes());
+                channel.write(buff);
+
                 LOGGER.log(Level.ERROR, message);
             }
         } else {

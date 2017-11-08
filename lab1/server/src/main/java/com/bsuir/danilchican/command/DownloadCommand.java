@@ -31,7 +31,7 @@ class DownloadCommand extends AbstractCommand {
             if (path != null) {
                 executeDownload(path);
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             LOGGER.log(Level.ERROR, "Error: " + e.getMessage());
         }
     }
@@ -46,7 +46,7 @@ class DownloadCommand extends AbstractCommand {
         return new DownloadCommand();
     }
 
-    private void executeDownload(String path) throws IOException {
+    private void executeDownload(String path) throws IOException, InterruptedException {
         Connection connection = Controller.getInstance().getConnection();
 
         if (connection != null) {
@@ -67,6 +67,7 @@ class DownloadCommand extends AbstractCommand {
 
                     while ((receivedBytes = fin.read(fileContent, 0, BUFF_SIZE)) != -1) {
                         connection.write(fileContent, receivedBytes);
+                        Thread.sleep(1);
                         LOGGER.log(Level.DEBUG, "Sent " + receivedBytes + " bytes.");
                     }
 

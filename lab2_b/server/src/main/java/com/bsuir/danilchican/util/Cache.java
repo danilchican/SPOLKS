@@ -8,14 +8,12 @@ import java.util.HashMap;
 
 public class Cache {
     private HashMap<Byte, byte[]> cache;
-    private final static int CACHE_SIZE = 10;
-
+    public final static int CACHE_SIZE = 70;
 
     /**
      * Logger to getCommand logs.
      */
     static final Logger LOGGER = LogManager.getLogger();
-
 
     public Cache() {
         cache = new HashMap<>();
@@ -51,5 +49,12 @@ public class Cache {
 
     public void clear() {
         cache.clear();
+    }
+
+    @Override
+    public String toString() {
+        return "Cache{" +
+                "cache length=" + cache.size() +
+                '}';
     }
 }

@@ -7,14 +7,16 @@ import org.apache.logging.log4j.Level;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 class DownloadCommand extends AbstractCommand {
 
     private static final String SUCCESS = "success";
     private static final String START_TRANSFER = "start";
 
-    private static final int BUFF_SIZE = 4096;
+    private static final int BUFF_SIZE = 59_152;
     private static int receivedBytes = 0;
 
     Cache cache = new Cache();
@@ -69,13 +71,16 @@ class DownloadCommand extends AbstractCommand {
 
                     int cacheIndex = 1;
 
-                    LOGGER.log(Level.INFO, "File transter started.");
+                    LOGGER.log(Level.INFO, "File transfer started.");
+                    Date start = new Date();
+
                     do {
                         byte indexPacket = 1;
 
                         byte[] fileContent = new byte[BUFF_SIZE + 1];
                         int onceCacheSize = 0;
                         int onceReceivingCount;
+
 
                         while ((onceReceivingCount = fin.read(fileContent, 1, BUFF_SIZE)) != -1 && !cache.isFull()) {
                             fileContent[0] = indexPacket;
@@ -84,15 +89,20 @@ class DownloadCommand extends AbstractCommand {
                             cache.add(indexPacket, Arrays.copyOfRange(fileContent, 0, onceReceivingCount + 1));
                             indexPacket++;
 
-                            if (indexPacket > 20) {
+                            if (indexPacket > Cache.CACHE_SIZE) {
                                 indexPacket = 1;
                             }
 
                             fileContent = new byte[BUFF_SIZE + 1];
                         }
 
-
+                        //Date startRead = new Date();
                         sendClientCache(onceCacheSize, cacheIndex);
+                        //Date endRead = new Date();
+
+                        //long resultTimeRead = startRead.getTime() - endRead.getTime();
+                        // LOGGER.log(Level.INFO, "Sending time: " + resultTimeRead);
+
                         fin = new FileInputStream(file);
                         fin.skip(receivedBytes);
 
@@ -101,7 +111,12 @@ class DownloadCommand extends AbstractCommand {
 
                     /* End transfer file */
 
+                    Date end = new Date();
+                    long resultTime = end.getTime() - start.getTime();
+
                     LOGGER.log(Level.INFO, "File is transferred.");
+                    long resultTimeInSeconds = TimeUnit.SECONDS.convert(resultTime, TimeUnit.MILLISECONDS);
+                    LOGGER.log(Level.INFO, "Transfer time: " + ((resultTimeInSeconds > 0) ? resultTimeInSeconds + "s" : resultTime + "ms"));
                 } else {
                     LOGGER.log(Level.ERROR, START_TRANSFER + " flag not founded...");
                 }
@@ -117,27 +132,38 @@ class DownloadCommand extends AbstractCommand {
 
     private void sendClientCache(int oneCacheSize, int cacheIndex) throws IOException {
         Connection connection = Controller.getInstance().getConnection();
-        //LOGGER.log(Level.INFO, "Starting to send cache " + cacheIndex + " to client.");
+        LOGGER.log(Level.DEBUG, "Starting to send cache " + cacheIndex + " to client.");
+
+        Date start = new Date();
 
         for (Map.Entry<Byte, byte[]> entry : cache.get().entrySet()) {
             connection.write(entry.getValue(), entry.getValue().length);
-            //LOGGER.log(Level.DEBUG, "Sent cache item[" + entry.getKey() + "] = " + entry.getValue().length + " bytes.");
-
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                LOGGER.log(Level.WARN, "Error: " + e.getMessage());
-            }
+            LOGGER.log(Level.DEBUG, "Sent cache item[" + entry.getKey() + "] = " + entry.getValue().length + " bytes.");
+//
+//            try {
+//                Thread.sleep(2);
+//            } catch (InterruptedException e) {
+//                LOGGER.log(Level.WARN, "Error: " + e.getMessage());
+//            }
         }
 
+        Date end = new Date();
+
+        long resultTimeWrite = start.getTime() - end.getTime();
+
+        start = new Date();
         String resultClientCache = connection.read();
+        end = new Date();
+
+        long resultTimeRead = start.getTime() - end.getTime();
+        LOGGER.log(Level.INFO, "Send/Wait time cache[" + cacheIndex + "]: " + resultTimeWrite + "/" + resultTimeRead);
 
         if (SUCCESS.equals(resultClientCache)) {
-            ///LOGGER.log(Level.INFO, "Cache " + cacheIndex + " sent successfully. Size: " + oneCacheSize);
+            //LOGGER.log(Level.DEBUG, "Cache " + cacheIndex + " sent successfully. Size: " + oneCacheSize);
             cache.clear();
             receivedBytes += oneCacheSize;
         } else {
-           // LOGGER.log(Level.ERROR, "Trying to send cache " + cacheIndex + " once again.");
+            LOGGER.log(Level.ERROR, "Trying to send cache " + cacheIndex + " once again.");
             sendClientCache(oneCacheSize, cacheIndex);
         }
     }
