@@ -9,9 +9,7 @@ import org.apache.logging.log4j.Level;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 class DownloadCommand extends AbstractCommand {
@@ -136,7 +134,7 @@ class DownloadCommand extends AbstractCommand {
                                     break;
                                 }
 
-                                LOGGER.log(Level.INFO, "Received bytes: " + receivedBytes);
+                                LOGGER.log(Level.DEBUG, "Received bytes: " + receivedBytes);
                             }
 
                             fos.close();
