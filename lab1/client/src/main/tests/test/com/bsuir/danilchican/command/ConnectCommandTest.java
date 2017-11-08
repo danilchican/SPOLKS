@@ -12,7 +12,7 @@ public class ConnectCommandTest {
 
     @Test
     public void validateTokenSuccess() throws WrongCommandFormatException, CommandNotFoundException {
-        final String tokenValue = "192.168.0.1";
+        final String tokenValue = "127.0.0.1";
         final String cmd = "connect -" + ConnectCommand.AvailableToken.IP.getName() + "='" + tokenValue + "'";
         final ICommand command = new Parser().handle(cmd);
 
@@ -40,7 +40,7 @@ public class ConnectCommandTest {
 
     @Test
     public void validateTokensSuccess() throws WrongCommandFormatException, CommandNotFoundException {
-        final String tokenValue = "192.168.0.1";
+        final String tokenValue = "127.0.0.1";
         final String cmd = "connect -" + ConnectCommand.AvailableToken.IP.getName() + "='" + tokenValue + "'";
         final ICommand command = new Parser().handle(cmd);
 

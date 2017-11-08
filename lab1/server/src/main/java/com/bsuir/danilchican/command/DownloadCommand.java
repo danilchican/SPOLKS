@@ -6,13 +6,15 @@ import org.apache.logging.log4j.Level;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 class DownloadCommand extends AbstractCommand {
 
     private static final String SUCCESS = "success";
     private static final String START_TRANSFER = "start";
 
-    private static final int BUFF_SIZE = 4096;
+    private static final int BUFF_SIZE = 12288;
 
     DownloadCommand() {
         Arrays.stream(AvailableToken.values()).forEach(t -> availableTokens.put(t.getName(), t.getRegex()));
@@ -61,12 +63,19 @@ class DownloadCommand extends AbstractCommand {
                     int receivedBytes;
                     byte fileContent[] = new byte[BUFF_SIZE];
 
+                    Date start = new Date();
+
                     while ((receivedBytes = fin.read(fileContent, 0, BUFF_SIZE)) != -1) {
                         connection.write(fileContent, receivedBytes);
                         LOGGER.log(Level.DEBUG, "Sent " + receivedBytes + " bytes.");
                     }
 
+                    Date end = new Date();
+                    long resultTime = end.getTime() - start.getTime();
+
                     LOGGER.log(Level.INFO, "File is transferred.");
+                    long resultTimeInSeconds = TimeUnit.SECONDS.convert(resultTime, TimeUnit.MILLISECONDS);
+                    LOGGER.log(Level.INFO, "Transfer time: " + ((resultTimeInSeconds > 0) ? resultTimeInSeconds + "s" : resultTime + "ms"));
                 } else {
                     LOGGER.log(Level.ERROR, START_TRANSFER + " flag not founded...");
                 }
