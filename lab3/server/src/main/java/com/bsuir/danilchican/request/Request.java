@@ -1,7 +1,5 @@
 package com.bsuir.danilchican.request;
 
-import com.bsuir.danilchican.command.ICommand;
-import com.bsuir.danilchican.util.SocketBuffer;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,7 +9,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.util.Arrays;
 
 import static com.bsuir.danilchican.command.DownloadCommand.BUFF_SIZE;
 import static com.bsuir.danilchican.command.DownloadCommand.START_TRANSFER;
@@ -27,13 +27,14 @@ public class Request {
     private int step = 0;
 
     private SocketChannel channel;
+    private SelectionKey key;
     private String cmd;
 
-    private File file;
     private FileInputStream fin;
     private int receivedBytes = 0;
 
-    public Request(SocketChannel channel) {
+    public Request(SelectionKey key, SocketChannel channel) {
+        this.key = key;
         this.channel = channel;
     }
 
@@ -47,8 +48,8 @@ public class Request {
         if(isFree()) {
             this.step = 0;
             this.receivedBytes = 0;
-            this.file = null;
             this.fin = null;
+            key.interestOps(SelectionKey.OP_READ);
         }
     }
 
@@ -57,7 +58,6 @@ public class Request {
     }
 
     public void setFile(File file) throws FileNotFoundException {
-        this.file = file;
         this.fin = new FileInputStream(file);
     }
 
@@ -80,21 +80,24 @@ public class Request {
 
     private void checkStartRequest() throws IOException {
         if (START_TRANSFER.equals(cmd)) {
-            executeDownload();
+            key.interestOps(SelectionKey.OP_WRITE);
         } else {
+            setFree(true);
             LOGGER.log(Level.ERROR, START_TRANSFER + " flag not founded...");
         }
     }
 
     private void executeDownload() throws IOException {
         byte fileContent[] = new byte[BUFF_SIZE];
+        int count;
 
-        if ((receivedBytes = fin.read(fileContent, 0, BUFF_SIZE)) != -1) {
+        if ((count = fin.read(fileContent, 0, BUFF_SIZE)) != -1) {
+            receivedBytes += count;
+            fileContent = Arrays.copyOfRange(fileContent, 0, count);
             ByteBuffer buffToWrite = ByteBuffer.wrap(fileContent);
             channel.write(buffToWrite); // change channel
             LOGGER.log(Level.DEBUG, "Sent " + receivedBytes + " bytes.");
         } else {
-            fin.close();
             setFree(true);
             LOGGER.log(Level.INFO, "File is transferred.");
         }

@@ -1,5 +1,7 @@
 package com.bsuir.danilchican.connection;
 
+import com.bsuir.danilchican.command.ICommand;
+import com.bsuir.danilchican.parser.Parser;
 import com.bsuir.danilchican.request.Request;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -96,11 +98,13 @@ public class Connection {
                     ClientSession newClientSession = new ClientSession(readKey, acceptedChannel);
 
                     clientMap.put(readKey, newClientSession);
-                    requests.put(newClientSession, new Request(acceptedChannel));
+                    requests.put(newClientSession, new Request(readKey, acceptedChannel));
 
                     LOGGER.log(Level.INFO, "Client " + acceptedChannel.getRemoteAddress() + " connected.");
                     LOGGER.log(Level.INFO, "Total clients: " + clientMap.size());
                 }
+
+                boolean isUserDisconnected = false;
 
                 if (key.isReadable()) {
                     ClientSession session = clientMap.get(key);
@@ -111,6 +115,32 @@ public class Connection {
                     }
 
                     session.read();
+                    isUserDisconnected = session.isUserDisconnected();
+                }
+
+                if (!isUserDisconnected) {
+                    if (key.isWritable()) {
+                        ClientSession session = clientMap.get(key);
+
+                        if (session == null) {
+                            LOGGER.log(Level.ERROR, "Client session not found.");
+                            continue;
+                        }
+
+                        Request request = Connection.requests.get(session);
+
+                        if (request != null) {
+                            ClientSession.GLOBAL_USER_REQUEST = request;
+
+                            if (!request.isFree()) {
+                                request.execute(null);
+                            } else {
+                                LOGGER.log(Level.ERROR, "Operation WRITE is not available.");
+                            }
+                        } else {
+                            LOGGER.log(Level.ERROR, "User request is empty.");
+                        }
+                    }
                 }
             } catch (IOException e) {
                 LOGGER.log(Level.ERROR, e.getMessage());

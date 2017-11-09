@@ -24,24 +24,32 @@ public class ClientSession {
 
     public static final int SIZE_BUFF = 256;
 
-    private SelectionKey selkey;
+    private SelectionKey readSelkey;
     private SocketChannel channel;
     private SocketBuffer buffer;
 
+    private boolean disconnected = false;
+
     public static Request GLOBAL_USER_REQUEST;
 
-    ClientSession(SelectionKey selkey, SocketChannel channel) throws IOException {
-        this.selkey = selkey;
+    ClientSession(SelectionKey readSelkey, SocketChannel channel) throws IOException {
+        this.readSelkey = readSelkey;
         this.channel = (SocketChannel) channel.configureBlocking(false); // asynchronous/non-blocking
         this.buffer = new SocketBuffer();
     }
 
+    public boolean isUserDisconnected() {
+        return disconnected;
+    }
+
     private void disconnect() {
-        Connection.clientMap.remove(selkey);
+        Connection.clientMap.remove(readSelkey);
+        Connection.requests.remove(this);
+        disconnected = true;
 
         try {
-            if (selkey != null) {
-                selkey.cancel();
+            if (readSelkey != null) {
+                readSelkey.cancel();
             }
 
             if (channel == null) {
