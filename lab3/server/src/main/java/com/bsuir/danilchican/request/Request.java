@@ -32,8 +32,10 @@ public class Request {
 
     private FileInputStream fin;
     private int receivedBytes = 0;
+    private String clientName;
 
-    public Request(SelectionKey key, SocketChannel channel) {
+    public Request(String clientName, SelectionKey key, SocketChannel channel) {
+        this.clientName = clientName;
         this.key = key;
         this.channel = channel;
     }
@@ -95,11 +97,11 @@ public class Request {
             receivedBytes += count;
             fileContent = Arrays.copyOfRange(fileContent, 0, count);
             ByteBuffer buffToWrite = ByteBuffer.wrap(fileContent);
-            channel.write(buffToWrite); // change channel
+            channel.write(buffToWrite);
             LOGGER.log(Level.DEBUG, "Sent " + receivedBytes + " bytes.");
         } else {
             setFree(true);
-            LOGGER.log(Level.INFO, "File is transferred.");
+            LOGGER.log(Level.INFO, "File is transferred for " + clientName + ".");
         }
     }
 }
