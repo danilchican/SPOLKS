@@ -4,6 +4,7 @@ import com.bsuir.danilchican.command.ICommand;
 import com.bsuir.danilchican.exception.CommandNotFoundException;
 import com.bsuir.danilchican.exception.WrongCommandFormatException;
 import com.bsuir.danilchican.parser.Parser;
+import com.bsuir.danilchican.request.Request;
 import com.bsuir.danilchican.util.SocketBuffer;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -26,6 +27,8 @@ public class ClientSession {
     private SelectionKey selkey;
     private SocketChannel channel;
     private SocketBuffer buffer;
+
+    public static Request GLOBAL_USER_REQUEST;
 
     ClientSession(SelectionKey selkey, SocketChannel channel) throws IOException {
         this.selkey = selkey;
@@ -70,9 +73,21 @@ public class ClientSession {
             String cmd = new String(tempData, 0, countBytes);
             LOGGER.log(Level.DEBUG, "Client: " + cmd);
 
-            ICommand command = new Parser().handle(cmd);
-            command.setChannel(channel);
-            command.execute();
+            Request request = Connection.requests.get(this);
+
+            if(request != null) {
+                GLOBAL_USER_REQUEST = request;
+
+                if(request.isFree()) {
+                    ICommand command = new Parser().handle(cmd);
+                    command.setChannel(channel);
+                    command.execute();
+                } else {
+                    request.execute(cmd);
+                }
+            } else {
+                LOGGER.log(Level.ERROR, "User request is empty.");
+            }
         } catch (IOException e) {
             LOGGER.log(Level.ERROR, e.getMessage());
             disconnect();

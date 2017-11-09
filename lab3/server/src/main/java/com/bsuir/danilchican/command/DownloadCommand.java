@@ -9,12 +9,14 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-class DownloadCommand extends AbstractCommand {
+import static com.bsuir.danilchican.connection.ClientSession.GLOBAL_USER_REQUEST;
+
+public class DownloadCommand extends AbstractCommand {
 
     private static final String SUCCESS = "success";
-    private static final String START_TRANSFER = "start";
+    public static final String START_TRANSFER = "start";
 
-    private static final int BUFF_SIZE = 12288;
+    public static final int BUFF_SIZE = 12288;
 
     DownloadCommand() {
         Arrays.stream(AvailableToken.values()).forEach(t -> availableTokens.put(t.getName(), t.getRegex()));
@@ -57,41 +59,18 @@ class DownloadCommand extends AbstractCommand {
             if (file.exists() && !file.isDirectory()) {
                 String message = SUCCESS + " " + fileSize;
                 ByteBuffer buff = ByteBuffer.wrap(message.getBytes());
+
+                GLOBAL_USER_REQUEST.setFile(file);
+                GLOBAL_USER_REQUEST.setFree(false);
+                GLOBAL_USER_REQUEST.nextStep();
+
                 channel.write(buff);
-
-                SocketBuffer buffer = new SocketBuffer();
-                int countBytes;
-
-                // TODO error not wait
-                if ((countBytes = channel.read((ByteBuffer) buffer.clear())) < 1) {
-                    LOGGER.log(Level.ERROR, "Buffer is clear.");
-                    return;
-                }
-
-                byte[] tempData = buffer.read(countBytes);
-                String cmd = new String(tempData, 0, countBytes);
-
-                if (START_TRANSFER.equals(cmd)) {
-                    FileInputStream fin = new FileInputStream(file);
-
-                    int receivedBytes;
-                    byte fileContent[] = new byte[BUFF_SIZE];
-
-                    while ((receivedBytes = fin.read(fileContent, 0, BUFF_SIZE)) != -1) {
-                        ByteBuffer buffToWrite = ByteBuffer.wrap(fileContent);
-                        channel.write(buffToWrite);
-                        LOGGER.log(Level.DEBUG, "Sent " + receivedBytes + " bytes.");
-                    }
-
-                    LOGGER.log(Level.INFO, "File is transferred.");
-                } else {
-                    LOGGER.log(Level.ERROR, START_TRANSFER + " flag not founded...");
-                }
             } else {
                 final String message = "File does not exists or something went wrong.";
                 ByteBuffer buff = ByteBuffer.wrap(message.getBytes());
                 channel.write(buff);
 
+                GLOBAL_USER_REQUEST.setFree(true);
                 LOGGER.log(Level.ERROR, message);
             }
         } else {

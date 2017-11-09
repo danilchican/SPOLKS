@@ -1,5 +1,6 @@
 package com.bsuir.danilchican.connection;
 
+import com.bsuir.danilchican.request.Request;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -7,7 +8,9 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -24,6 +27,7 @@ public class Connection {
     private static final int LISTEN_PERIOD_TIME_MS = 500;
 
     static HashMap<SelectionKey, ClientSession> clientMap = new HashMap<>();
+    public static HashMap<ClientSession, Request> requests = new HashMap<>();
 
     private ServerSocketChannel serverChannel;
     private Selector selector;
@@ -87,8 +91,12 @@ public class Connection {
                     }
 
                     acceptedChannel.configureBlocking(false);
+
                     SelectionKey readKey = acceptedChannel.register(selector, SelectionKey.OP_READ);
-                    clientMap.put(readKey, new ClientSession(readKey, acceptedChannel));
+                    ClientSession newClientSession = new ClientSession(readKey, acceptedChannel);
+
+                    clientMap.put(readKey, newClientSession);
+                    requests.put(newClientSession, new Request(acceptedChannel));
 
                     LOGGER.log(Level.INFO, "Client " + acceptedChannel.getRemoteAddress() + " connected.");
                     LOGGER.log(Level.INFO, "Total clients: " + clientMap.size());
@@ -104,7 +112,6 @@ public class Connection {
 
                     session.read();
                 }
-
             } catch (IOException e) {
                 LOGGER.log(Level.ERROR, e.getMessage());
             }
