@@ -97,7 +97,7 @@ public class ClientSession {
                 LOGGER.log(Level.ERROR, "User request is empty.");
             }
         } catch (IOException e) {
-            LOGGER.log(Level.ERROR, e.getMessage());
+            //LOGGER.log(Level.ERROR, e.getMessage());
             disconnect();
         } catch (WrongCommandFormatException | CommandNotFoundException e) {
             LOGGER.log(Level.ERROR, "Error: " + e.getMessage());

@@ -19,8 +19,6 @@ class DownloadCommand extends AbstractCommand {
     private static final String SUCCESS = "success";
     private static final String START_TRANSFER = "start";
 
-    private static final int BUFF_SIZE = 236_608;
-
     DownloadCommand() {
         Arrays.stream(AvailableToken.values()).forEach(t -> availableTokens.put(t.getName(), t.getRegex()));
     }
@@ -88,6 +86,8 @@ class DownloadCommand extends AbstractCommand {
         Printer.println("Command format:");
         Printer.println("   download -path='path to file' -name='file name' [-help]");
     }
+
+    private static final int BUFF_SIZE = 236_608;
 
     private void executeDownload() {
         Connection connection = Controller.getInstance().getConnection();

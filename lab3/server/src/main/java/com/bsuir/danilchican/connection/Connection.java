@@ -19,7 +19,7 @@ public class Connection {
      */
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private static final String ADDRESS = "localhost";
+    private static final String ADDRESS = "192.168.10.10";
 
     private static final int PORT = 1024;
     private static final int LISTEN_PERIOD_TIME_MS = 500;

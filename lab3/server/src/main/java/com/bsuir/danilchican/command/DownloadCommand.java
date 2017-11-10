@@ -16,8 +16,6 @@ public class DownloadCommand extends AbstractCommand {
     private static final String SUCCESS = "success";
     public static final String START_TRANSFER = "start";
 
-    public static final int BUFF_SIZE = 236_608;
-
     DownloadCommand() {
         Arrays.stream(AvailableToken.values()).forEach(t -> availableTokens.put(t.getName(), t.getRegex()));
     }
@@ -77,6 +75,8 @@ public class DownloadCommand extends AbstractCommand {
             LOGGER.log(Level.WARN, "You're not connected to server.");
         }
     }
+
+    public static final int BUFF_SIZE = 236_608;
 
     private enum AvailableToken {
         PATH("path", "^[\\w .-:\\\\]+$"),
