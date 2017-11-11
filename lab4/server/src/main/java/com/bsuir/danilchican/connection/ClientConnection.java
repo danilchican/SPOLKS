@@ -1,7 +1,9 @@
 package com.bsuir.danilchican.connection;
 
 import com.bsuir.danilchican.pool.ConnectionPool;
+
 import static com.bsuir.danilchican.pool.ConnectionPool.lastConnectionIndex;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,7 +18,7 @@ public class ClientConnection implements Runnable {
      */
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private static final int TIMEOUT_MS = 1_000; // ms
+    private static final int TIMEOUT_MS = 500; // ms
     private final int index;
     private boolean isRepeated = false;
 
@@ -31,10 +33,6 @@ public class ClientConnection implements Runnable {
     public ClientConnection(final int index, ReentrantLock lock) {
         this.index = index;
         this.lock = lock;
-    }
-
-    public int getIndex() {
-        return index;
     }
 
     private void acceptClient(ConnectionPool connectionPool) throws InterruptedException {
@@ -59,7 +57,7 @@ public class ClientConnection implements Runnable {
         try {
             // TODO execute client commands here
             LOGGER.log(Level.INFO, "Execute client " + index + " commands.");
-            TimeUnit.SECONDS.sleep(3);
+            TimeUnit.SECONDS.sleep(2);
             // TODO client commands
         } catch (InterruptedException e) {
             LOGGER.log(Level.ERROR, e.getMessage());
@@ -68,46 +66,48 @@ public class ClientConnection implements Runnable {
 
     @Override
     public void run() {
-        ConnectionPool connectionPool = ConnectionPool.getInstance();
+        while (true) {
+            ConnectionPool connectionPool = ConnectionPool.getInstance();
 
-        try {
-            LOGGER.log(Level.INFO, "ClientConnection " + index + " started.");
+            try {
+                LOGGER.log(Level.INFO, "ClientConnection " + index + " started.");
 
-            lock.lock();
-            this.acceptClient(connectionPool);
-        } catch (InterruptedException e) {
-            LOGGER.log(Level.ERROR, e.getMessage());
-        } finally {
-            lock.unlock();
-        }
-
-        execute(connectionPool);
-
-        try {
-            while (true) {
-                if (connectionPool.getActualPoolSize() <= ConnectionPool.POOL_SIZE) {
-                    break;
-                }
-
-                LOGGER.log(Level.INFO, "Waiting timeout: " + TIMEOUT_MS + "ms to get lock.");
-
-                if (!lock.tryLock(TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
-                    throw new InterruptedException("Client " + index + ": can't get lock access. Timeout exceed.");
-                }
-
-                LOGGER.log(Level.INFO, "I got lock access!");
-
-                isRepeated = true;
+                lock.lock();
                 this.acceptClient(connectionPool);
+            } catch (InterruptedException e) {
+                LOGGER.log(Level.ERROR, e.getMessage());
+            } finally {
                 lock.unlock();
-
-                execute(connectionPool);
             }
-        } catch (InterruptedException e) {
-            LOGGER.log(Level.ERROR, e.getMessage());
-        }
 
-        connectionPool.removeConnection(this);
-        LOGGER.log(Level.INFO, "ClientConnection " + index + " finished. Pool size: " + connectionPool.getActualPoolSize());
+            execute(connectionPool);
+
+            try {
+                while (true) {
+                    if (connectionPool.getActualPoolSize() <= ConnectionPool.POOL_SIZE) {
+                        break;
+                    }
+
+                    LOGGER.log(Level.INFO, "Waiting timeout: " + TIMEOUT_MS + "ms to get lock.");
+
+                    if (!lock.tryLock(TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+                        throw new InterruptedException("Client " + index + ": can't get lock access. Timeout exceed.");
+                    }
+
+                    LOGGER.log(Level.INFO, "I got lock access!");
+
+                    isRepeated = true;
+                    this.acceptClient(connectionPool);
+                    lock.unlock();
+
+                    execute(connectionPool);
+                }
+            } catch (InterruptedException e) {
+                LOGGER.log(Level.ERROR, e.getMessage());
+                connectionPool.removeConnection(this);
+                LOGGER.log(Level.INFO, "Finished ClientConnection " + index + ". Pool size: " + connectionPool.getActualPoolSize());
+                break;
+            }
+        }
     }
 }

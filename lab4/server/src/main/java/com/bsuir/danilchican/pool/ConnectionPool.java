@@ -21,9 +21,10 @@ public final class ConnectionPool {
      */
     private static ConnectionPool instance;
 
-    public static final int POOL_SIZE = 5;
-    private int availableConnectionsCount = POOL_SIZE;
+    public static final int POOL_SIZE = 3;
     public static int lastConnectionIndex = POOL_SIZE;
+    private int availableConnectionsCount = POOL_SIZE;
+
     private static boolean createdInstance = false;
 
     private Map<ClientConnection, Thread> connections;
