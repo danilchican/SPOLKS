@@ -37,7 +37,6 @@ public class ClientConnection implements Runnable {
 
         if (!connectionPool.hasAvailableConnection() && !isRepeated) {
             int index = connectionPool.getActualPoolSize() + 1;
-            connectionPool.setActualPoolSize(index);
 
             ClientConnection connection = new ClientConnection(index, lock);
             connectionPool.addFreeConnection(connection);

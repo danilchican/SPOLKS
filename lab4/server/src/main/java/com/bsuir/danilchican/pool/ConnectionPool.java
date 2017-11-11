@@ -22,8 +22,7 @@ public final class ConnectionPool {
     private static ConnectionPool instance;
 
     public static final int POOL_SIZE = 5;
-    private int actualPoolSize = POOL_SIZE;
-    private int availableConnectionsCount = actualPoolSize;
+    private int availableConnectionsCount = POOL_SIZE;
     private static boolean createdInstance = false;
 
     private List<Thread> connections;
@@ -32,7 +31,7 @@ public final class ConnectionPool {
         connections = new ArrayList<>();
         ReentrantLock lock = new ReentrantLock();
 
-        for (int i = 0; i < actualPoolSize; i++) {
+        for (int i = 0; i < POOL_SIZE; i++) {
             ClientConnection connection = new ClientConnection(i + 1, lock);
             connections.add(new Thread(connection));
         }
@@ -100,10 +99,6 @@ public final class ConnectionPool {
     }
 
     public int getActualPoolSize() {
-        return actualPoolSize;
-    }
-
-    public void setActualPoolSize(int actualPoolSize) {
-        this.actualPoolSize = actualPoolSize;
+        return connections.size();
     }
 }
