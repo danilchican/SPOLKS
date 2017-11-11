@@ -5,8 +5,8 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 public final class ConnectionPool {
@@ -23,17 +23,18 @@ public final class ConnectionPool {
 
     public static final int POOL_SIZE = 5;
     private int availableConnectionsCount = POOL_SIZE;
+    public static int lastConnectionIndex = POOL_SIZE;
     private static boolean createdInstance = false;
 
-    private List<Thread> connections;
+    private Map<ClientConnection, Thread> connections;
 
     private ConnectionPool() {
-        connections = new ArrayList<>();
+        connections = new HashMap<>();
         ReentrantLock lock = new ReentrantLock();
 
         for (int i = 0; i < POOL_SIZE; i++) {
             ClientConnection connection = new ClientConnection(i + 1, lock);
-            connections.add(new Thread(connection));
+            connections.put(connection, new Thread(connection));
         }
     }
 
@@ -82,7 +83,7 @@ public final class ConnectionPool {
      * Start connections to listen accepting a new client.
      */
     public void runListeners() {
-        connections.forEach(Thread::start);
+        connections.forEach((c, t) -> t.start());
     }
 
     /**
@@ -93,11 +94,25 @@ public final class ConnectionPool {
      * @param connection
      */
     public void addFreeConnection(ClientConnection connection) {
-        Thread conn = new Thread(connection);
-        connections.add(conn);
-        conn.start();
+        Thread connectionThread = new Thread(connection);
+        connections.put(connection, connectionThread);
+        connectionThread.start();
     }
 
+    /**
+     * Remove connection from pool.
+     *
+     * @param connection
+     */
+    public void removeConnection(ClientConnection connection) {
+        connections.remove(connection);
+    }
+
+    /**
+     * Get actual pool size.
+     *
+     * @return size
+     */
     public int getActualPoolSize() {
         return connections.size();
     }
