@@ -1,7 +1,6 @@
 package com.bsuir.danilchican.command;
 
 import com.bsuir.danilchican.connection.Connection;
-import com.bsuir.danilchican.controller.Controller;
 import org.apache.logging.log4j.Level;
 
 import java.io.IOException;
@@ -17,12 +16,12 @@ public class EchoCommand extends AbstractCommand {
      * Execute command.
      */
     @Override
-    public void execute() {
+    public void execute(Connection connection) {
         try {
             String content = getTokens().get(AvailableToken.CONTENT.getName());
 
             if (content != null) {
-                executeEcho(content);
+                executeEcho(content, connection);
             }
         } catch (IOException e) {
             LOGGER.log(Level.ERROR, "Error: " + e.getMessage());
@@ -39,8 +38,7 @@ public class EchoCommand extends AbstractCommand {
         return new EchoCommand();
     }
 
-    private void executeEcho(String content) throws IOException {
-        Connection connection = Controller.getInstance().getConnection();
+    private void executeEcho(String content, Connection connection) throws IOException {
         connection.write(content);
     }
 

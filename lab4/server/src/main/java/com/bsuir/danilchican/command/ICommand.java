@@ -1,5 +1,6 @@
 package com.bsuir.danilchican.command;
 
+import com.bsuir.danilchican.connection.Connection;
 import com.bsuir.danilchican.exception.WrongCommandFormatException;
 
 import java.util.Map;
@@ -9,7 +10,7 @@ public interface ICommand {
     /**
      * Execute command.
      */
-    void execute();
+    void execute(Connection connection);
 
     /**
      * Put token to command.

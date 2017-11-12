@@ -1,7 +1,6 @@
 package com.bsuir.danilchican.command;
 
 import com.bsuir.danilchican.connection.Connection;
-import com.bsuir.danilchican.controller.Controller;
 import org.apache.logging.log4j.Level;
 
 import java.io.IOException;
@@ -17,9 +16,7 @@ class TimeCommand extends AbstractCommand {
      * Execute command.
      */
     @Override
-    public void execute() {
-        Connection connection = Controller.getInstance().getConnection();
-
+    public void execute(Connection connection) {
         if(connection != null) {
             try {
                 DateFormat dateFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT);

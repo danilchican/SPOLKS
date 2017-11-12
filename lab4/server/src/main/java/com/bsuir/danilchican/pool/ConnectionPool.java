@@ -1,6 +1,7 @@
 package com.bsuir.danilchican.pool;
 
 import com.bsuir.danilchican.connection.ClientConnection;
+import com.bsuir.danilchican.connection.Connection;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,21 +22,28 @@ public final class ConnectionPool {
      */
     private static ConnectionPool instance;
 
-    public static final int POOL_SIZE = 3;
+    public static final int POOL_SIZE = 2;
     public static int lastConnectionIndex = POOL_SIZE;
     private int availableConnectionsCount = POOL_SIZE;
 
     private static boolean createdInstance = false;
 
     private Map<ClientConnection, Thread> connections;
+    private Connection serverConnection;
 
     private ConnectionPool() {
         connections = new HashMap<>();
-        ReentrantLock lock = new ReentrantLock();
+        serverConnection = new Connection();
 
-        for (int i = 0; i < POOL_SIZE; i++) {
-            ClientConnection connection = new ClientConnection(i + 1, lock);
-            connections.put(connection, new Thread(connection));
+        if (serverConnection.open()) {
+            ReentrantLock lock = new ReentrantLock();
+
+            for (int i = 0; i < POOL_SIZE; i++) {
+                ClientConnection connection = new ClientConnection(i + 1, lock);
+                connections.put(connection, new Thread(connection));
+            }
+        } else {
+            LOGGER.log(Level.FATAL, "Can't open server connection.");
         }
     }
 
@@ -55,6 +63,10 @@ public final class ConnectionPool {
         }
 
         return instance;
+    }
+
+    public Connection getServerConnection() {
+        return serverConnection;
     }
 
     /**
@@ -77,6 +89,7 @@ public final class ConnectionPool {
      * @return boolean
      */
     public boolean hasAvailableConnection() {
+        LOGGER.log(Level.DEBUG, "Locked (available) connections: " + availableConnectionsCount);
         return availableConnectionsCount > 0;
     }
 

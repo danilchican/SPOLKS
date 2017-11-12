@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.net.Socket;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -18,11 +19,12 @@ public class ClientConnection implements Runnable {
      */
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private static final int TIMEOUT_MS = 500; // ms
-    private final int index;
+    private static final int TIMEOUT_MS = 2_000; // ms
+    private int index;
     private boolean isRepeated = false;
 
     private ReentrantLock lock;
+    private Socket clientSocket;
 
     /**
      * Default constructor.
@@ -33,6 +35,53 @@ public class ClientConnection implements Runnable {
     public ClientConnection(final int index, ReentrantLock lock) {
         this.index = index;
         this.lock = lock;
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            // TODO fix counter
+            ConnectionPool connectionPool = ConnectionPool.getInstance();
+
+            try {
+                LOGGER.log(Level.INFO, "Free connection " + index + ". Waiting for client...");
+
+                lock.lock();
+                this.acceptClient(connectionPool);
+            } catch (InterruptedException e) {
+                LOGGER.log(Level.ERROR, e.getMessage());
+            } finally {
+                lock.unlock();
+            }
+
+            workWithClient(connectionPool);
+
+            try {
+                while (true) {
+                    if (connectionPool.getActualPoolSize() <= ConnectionPool.POOL_SIZE) {
+                        break;
+                    }
+
+                    LOGGER.log(Level.INFO, "Waiting timeout: " + TIMEOUT_MS + "ms to get lock.");
+
+                    if (!lock.tryLock(TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+                        throw new InterruptedException("Lock timeout exceed...");
+                    }
+
+                    LOGGER.log(Level.INFO, "I got lock access!");
+
+                    isRepeated = true;
+                    this.acceptClient(connectionPool);
+                    lock.unlock();
+
+                    workWithClient(connectionPool);
+                }
+            } catch (InterruptedException e) {
+                LOGGER.log(Level.WARN, e.getMessage());
+                connectionPool.removeConnection(this);
+                break;
+            }
+        }
     }
 
     private void acceptClient(ConnectionPool connectionPool) throws InterruptedException {
@@ -48,66 +97,15 @@ public class ClientConnection implements Runnable {
             LOGGER.log(Level.INFO, "Added new available connection. Pool size: " + connectionPool.getActualPoolSize());
         }
 
-        // TODO accept TCP here
-        TimeUnit.SECONDS.sleep(1);
-        LOGGER.log(Level.DEBUG, "ClientConnection " + index + " captured lock.");
+        clientSocket = connectionPool.getServerConnection().accept();
+        LOGGER.log(Level.INFO, "Client " + index + " connected.");
     }
 
-    private void execute(ConnectionPool connectionPool) {
-        try {
-            // TODO execute client commands here
-            LOGGER.log(Level.INFO, "Execute client " + index + " commands.");
-            TimeUnit.SECONDS.sleep(2);
-            // TODO client commands
-        } catch (InterruptedException e) {
-            LOGGER.log(Level.ERROR, e.getMessage());
-        }
-    }
-
-    @Override
-    public void run() {
-        while (true) {
-            ConnectionPool connectionPool = ConnectionPool.getInstance();
-
-            try {
-                LOGGER.log(Level.INFO, "ClientConnection " + index + " started.");
-
-                lock.lock();
-                this.acceptClient(connectionPool);
-            } catch (InterruptedException e) {
-                LOGGER.log(Level.ERROR, e.getMessage());
-            } finally {
-                lock.unlock();
-            }
-
-            execute(connectionPool);
-
-            try {
-                while (true) {
-                    if (connectionPool.getActualPoolSize() <= ConnectionPool.POOL_SIZE) {
-                        break;
-                    }
-
-                    LOGGER.log(Level.INFO, "Waiting timeout: " + TIMEOUT_MS + "ms to get lock.");
-
-                    if (!lock.tryLock(TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
-                        throw new InterruptedException("Client " + index + ": can't get lock access. Timeout exceed.");
-                    }
-
-                    LOGGER.log(Level.INFO, "I got lock access!");
-
-                    isRepeated = true;
-                    this.acceptClient(connectionPool);
-                    lock.unlock();
-
-                    execute(connectionPool);
-                }
-            } catch (InterruptedException e) {
-                LOGGER.log(Level.ERROR, e.getMessage());
-                connectionPool.removeConnection(this);
-                LOGGER.log(Level.INFO, "Finished ClientConnection " + index + ". Pool size: " + connectionPool.getActualPoolSize());
-                break;
-            }
-        }
+    private void workWithClient(ConnectionPool connectionPool) {
+        Connection connection = new Connection();
+        connection.listen(clientSocket, index);
+        index = ++lastConnectionIndex;
+        connectionPool.incAvailableConnections();
+        connectionPool.hasAvailableConnection();
     }
 }

@@ -4,6 +4,7 @@ import com.bsuir.danilchican.command.ICommand;
 import com.bsuir.danilchican.exception.CommandNotFoundException;
 import com.bsuir.danilchican.exception.WrongCommandFormatException;
 import com.bsuir.danilchican.parser.Parser;
+import com.bsuir.danilchican.pool.ConnectionPool;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -77,7 +78,6 @@ public class Connection {
     public boolean open() {
         try {
             socket = new ServerSocket(PORT, BACKLOG);
-            LOGGER.log(Level.INFO, "Server started.");
 
             return true;
         } catch (IOException e) {
@@ -86,44 +86,49 @@ public class Connection {
         }
     }
 
+    public Socket accept() {
+        Socket client = null;
+
+        try {
+            client = socket.accept();
+        } catch (IOException e) {
+            LOGGER.log(Level.ERROR, e.getMessage());
+        }
+
+        return client;
+    }
+
     /**
      * Listen for clients.
      */
-    public void listen() {
-        while (true) {
-            Socket client;
+    public void listen(Socket client, int index) {
+        try {
+            this.initStream(client);
 
-            try {
-                client = socket.accept();
+            while (true) {
+                try {
+                    int countBytes;
 
-                LOGGER.log(Level.INFO, "Client is connected!");
-                this.initStream(client);
-
-                while (true) {
-                    try {
-                        int countBytes;
-
-                        if ((countBytes = is.read(clientMessage)) == -1) {
-                            break;
-                        }
-
-                        String cmd = new String(clientMessage, 0, countBytes);
-                        LOGGER.log(Level.DEBUG, "Client: " + cmd);
-
-                        ICommand command = new Parser().handle(cmd);
-                        command.execute();
-                    } catch (IOException e) {
-                        LOGGER.log(Level.ERROR, "Client stopped working with server.");
+                    if ((countBytes = is.read(clientMessage)) == -1) {
                         break;
-                    } catch (WrongCommandFormatException | CommandNotFoundException e) {
-                        LOGGER.log(Level.ERROR, "Error: " + e.getMessage());
                     }
-                }
 
-                this.closeClientConnection(client);
-            } catch (IOException e) {
-                LOGGER.log(Level.ERROR, "Can't close connection.");
+                    String cmd = new String(clientMessage, 0, countBytes);
+                    LOGGER.log(Level.DEBUG, "Client: " + cmd);
+
+                    ICommand command = new Parser().handle(cmd);
+                    command.execute(this);
+                } catch (IOException e) {
+                    LOGGER.log(Level.ERROR, "Client stopped working with server. " + e.getMessage());
+                    break;
+                } catch (WrongCommandFormatException | CommandNotFoundException e) {
+                    LOGGER.log(Level.ERROR, "Error: " + e.getMessage());
+                }
             }
+
+            this.closeClientConnection(client, index);
+        } catch (IOException e) {
+            LOGGER.log(Level.ERROR, e.getMessage());
         }
     }
 
@@ -138,10 +143,11 @@ public class Connection {
         os = s.getOutputStream();
     }
 
-    private void closeClientConnection(Socket s) throws IOException {
+    private void closeClientConnection(Socket s, int index) throws IOException {
         is.close();
         os.close();
         s.close();
-        System.out.println("Client has been disconnected!");
+
+        LOGGER.log(Level.INFO, "Client " + index + " has been disconnected.");
     }
 }

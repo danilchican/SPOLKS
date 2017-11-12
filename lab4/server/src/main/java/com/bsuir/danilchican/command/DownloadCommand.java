@@ -1,7 +1,6 @@
 package com.bsuir.danilchican.command;
 
 import com.bsuir.danilchican.connection.Connection;
-import com.bsuir.danilchican.controller.Controller;
 import org.apache.logging.log4j.Level;
 
 import java.io.*;
@@ -24,12 +23,12 @@ class DownloadCommand extends AbstractCommand {
      * Execute command.
      */
     @Override
-    public void execute() {
+    public void execute(Connection connection) {
         try {
             String path = getTokens().get(AvailableToken.PATH.getName());
 
             if (path != null) {
-                executeDownload(path);
+                executeDownload(path, connection);
             }
         } catch (IOException | InterruptedException e) {
             LOGGER.log(Level.ERROR, "Error: " + e.getMessage());
@@ -46,9 +45,7 @@ class DownloadCommand extends AbstractCommand {
         return new DownloadCommand();
     }
 
-    private void executeDownload(String path) throws IOException, InterruptedException {
-        Connection connection = Controller.getInstance().getConnection();
-
+    private void executeDownload(String path, Connection connection) throws IOException, InterruptedException {
         if (connection != null) {
             File file = new File(path);
 
