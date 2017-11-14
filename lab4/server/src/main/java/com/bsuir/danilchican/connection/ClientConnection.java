@@ -40,13 +40,12 @@ public class ClientConnection implements Runnable {
     @Override
     public void run() {
         while (true) {
-            // TODO fix counter
             ConnectionPool connectionPool = ConnectionPool.getInstance();
 
             try {
-                LOGGER.log(Level.INFO, "Free connection " + index + ". Waiting for client...");
-
                 lock.lock();
+
+                LOGGER.log(Level.INFO, "Thread " + index + " has been locked.");
                 this.acceptClient(connectionPool);
             } catch (InterruptedException e) {
                 LOGGER.log(Level.ERROR, e.getMessage());
@@ -78,14 +77,22 @@ public class ClientConnection implements Runnable {
                 }
             } catch (InterruptedException e) {
                 LOGGER.log(Level.WARN, e.getMessage());
+
+                connectionPool.decAvailableConnections();
                 connectionPool.removeConnection(this);
+                connectionPool.hasAvailableConnection();
+
+                LOGGER.log(Level.INFO, "Pool size: " + connectionPool.getActualPoolSize());
                 break;
             }
         }
     }
 
     private void acceptClient(ConnectionPool connectionPool) throws InterruptedException {
+        clientSocket = connectionPool.getServerConnection().accept();
         connectionPool.decAvailableConnections();
+
+        LOGGER.log(Level.INFO, "Thread " + index + " has been accepted.");
 
         if (!connectionPool.hasAvailableConnection() && !isRepeated) {
             int index = ++lastConnectionIndex;
@@ -94,17 +101,17 @@ public class ClientConnection implements Runnable {
             connectionPool.addFreeConnection(connection);
 
             connectionPool.incAvailableConnections();
-            LOGGER.log(Level.INFO, "Added new available connection. Pool size: " + connectionPool.getActualPoolSize());
+            LOGGER.log(Level.INFO, "Added new thread to pool. Pool size: " + connectionPool.getActualPoolSize());
+            connectionPool.hasAvailableConnection();
         }
-
-        clientSocket = connectionPool.getServerConnection().accept();
-        LOGGER.log(Level.INFO, "Client " + index + " connected.");
     }
 
     private void workWithClient(ConnectionPool connectionPool) {
         Connection connection = new Connection();
         connection.listen(clientSocket, index);
+
         index = ++lastConnectionIndex;
+
         connectionPool.incAvailableConnections();
         connectionPool.hasAvailableConnection();
     }
