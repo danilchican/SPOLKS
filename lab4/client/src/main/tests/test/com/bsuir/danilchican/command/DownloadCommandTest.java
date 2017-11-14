@@ -12,7 +12,8 @@ public class DownloadCommandTest {
 
     @Test
     public void download() throws WrongCommandFormatException, CommandNotFoundException {
-        String IP = "192.168.10.10";
+        String IP = "127.0.0.1";
+        //String IP = "192.168.10.10";
         String cmd = "connect -" + ConnectCommand.AvailableToken.IP.getName() + "='" + IP + "'";
         ICommand command = new Parser().handle(cmd);
 
@@ -21,7 +22,8 @@ public class DownloadCommandTest {
 
         command.execute();
 
-        cmd = "download -path='d:/test.rar' -name='d:/spolks/test_1_big_final.rar'";
+//        cmd = "download -path='d:/test.rar' -name='d:/spolks/test_1_big_final.rar'";
+        cmd = "download -path='d:/spolks/transfer.zip' -name='d:/spolks/test_4.zip'";
         command = new Parser().handle(cmd);
         command.execute();
     }

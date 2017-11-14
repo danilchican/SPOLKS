@@ -89,7 +89,7 @@ public final class ConnectionPool {
      * @return boolean
      */
     public boolean hasAvailableConnection() {
-        LOGGER.log(Level.DEBUG, "Available threads: " + availableConnectionsCount);
+        LOGGER.log(Level.INFO, "Available threads: " + availableConnectionsCount);
         return availableConnectionsCount > 0;
     }
 
