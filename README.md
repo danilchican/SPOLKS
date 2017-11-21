@@ -21,7 +21,7 @@ Sockets: UDP
 ## 3rd lab
 ```
 Sockets: TCP/IP
-Description: Multiplex with async in/out communication.  
+Description: Multiplex server with async in/out communication.  
 ```
 
 ## 4th lab
