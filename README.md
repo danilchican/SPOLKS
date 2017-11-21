@@ -1,5 +1,5 @@
 # SPOLKS
-Server-client communcation programms
+Server/Client communication programms.
 
 ## 1st lab
 ```
@@ -15,7 +15,7 @@ Description: sending urgent data
 ```
 #### Lab B
 ```
-Socket: UDP
+Sockets: UDP
 ```
 
 ## 3rd lab
